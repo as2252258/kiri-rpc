@@ -2,6 +2,11 @@
 
 namespace Kiri\Rpc;
 
+use Kiri\Exception\ConfigException;
+use Kiri\Kiri;
+use ReflectionException;
+use Server\Constant;
+use Server\ServerManager;
 use Server\SInterface\OnClose;
 use Server\SInterface\OnConnect;
 use Server\SInterface\OnPacket;
@@ -17,6 +22,30 @@ use Swoole\Server;
  */
 class Service implements OnClose, OnConnect, OnReceive, OnPacket, OnRequest
 {
+
+
+	/**
+	 * @param ServerManager $manager
+	 * @param array $config
+	 * @throws ConfigException
+	 * @throws ReflectionException
+	 */
+	public static function addRpcListener(ServerManager $manager, array $config)
+	{
+		$config['settings']['enable_unsafe_event'] = true;
+		$config['events'][Constant::RECEIVE] = [Service::class, 'onReceive'];
+		$implements = class_implements(Service::class);
+		if (in_array(OnConnect::class, $implements)) {
+			$config['events'][Constant::CONNECT] = [Service::class, 'onConnect'];
+		}
+		if (in_array(OnClose::class, $implements)) {
+			$config['events'][Constant::DISCONNECT] = [Service::class, 'onDisconnect'];
+			$config['events'][Constant::CLOSE] = [Service::class, 'onClose'];
+		}
+		$manager->addListener(
+			$config['type'], $config['host'], $config['port'], $config['mode'], $config
+		);
+	}
 
 
 	/**
