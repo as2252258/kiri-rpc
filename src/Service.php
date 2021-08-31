@@ -3,13 +3,12 @@
 namespace Kiri\Rpc;
 
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
 use ReflectionException;
+use Server\Abstracts\Tcp;
 use Server\Constant;
 use Server\ServerManager;
 use Server\SInterface\OnClose;
 use Server\SInterface\OnConnect;
-use Server\SInterface\OnPacket;
 use Server\SInterface\OnReceive;
 use Server\SInterface\OnRequest;
 use Swoole\Http\Request;
@@ -20,7 +19,7 @@ use Swoole\Server;
 /**
  *
  */
-class Service implements OnClose, OnConnect, OnReceive, OnPacket, OnRequest
+class Service extends Tcp implements OnClose, OnConnect, OnReceive, OnRequest
 {
 
 
@@ -32,6 +31,7 @@ class Service implements OnClose, OnConnect, OnReceive, OnPacket, OnRequest
 	 */
 	public static function addRpcListener(ServerManager $manager, array $config)
 	{
+		$config['settings']['enable_delay_receive'] = true;
 		$config['settings']['enable_unsafe_event'] = true;
 		$config['events'][Constant::RECEIVE] = [Service::class, 'onReceive'];
 		$implements = class_implements(Service::class);
@@ -74,18 +74,7 @@ class Service implements OnClose, OnConnect, OnReceive, OnPacket, OnRequest
 	 */
 	public function onConnect(Server $server, int $fd): void
 	{
-		// TODO: Implement onConnect() method.
-	}
-
-
-	/**
-	 * @param Server|\Server\Abstracts\Server $server
-	 * @param string $data
-	 * @param array $clientInfo
-	 */
-	public function onPacket(Server|\Server\Abstracts\Server $server, string $data, array $clientInfo): void
-	{
-		// TODO: Implement onPacket() method.
+		$server->confirm($fd);
 	}
 
 
@@ -97,7 +86,17 @@ class Service implements OnClose, OnConnect, OnReceive, OnPacket, OnRequest
 	 */
 	public function onReceive(Server $server, int $fd, int $reactor_id, string $data): void
 	{
-		// TODO: Implement onReceive() method.
+		try {
+
+			// TODO: Implement onReceive() method.
+			[$cmd, [$body, $protocol]] = Protocol::parse($data);
+		} catch(\Throwable $throwable){
+
+		}
+
+
+
+
 	}
 
 
