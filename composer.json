@@ -1,0 +1,25 @@
+{
+  "name": "game-worker/kiri-rpc",
+  "description": "kiri-rpc",
+  "authors": [
+    {
+      "name": "XiangLin",
+      "email": "as2252258@163.com"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0",
+    "ext-json": "*",
+    "ext-rdkafka": "*",
+    "psr/event-dispatcher": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kiri\\Rpc\\": "src/"
+     }
+  },
+  "require-dev": {
+    "kwn/php-rdkafka-stubs": "^2.0"
+  }
+}
