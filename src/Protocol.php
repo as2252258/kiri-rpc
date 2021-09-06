@@ -12,7 +12,7 @@ class Protocol
 	 * @param string $data
 	 * @return array|null
 	 */
-	public static function parse(string $data)
+	public static function parse(string $data): ?array
 	{
 		if (!str_contains($data, Protocol::SPLIT_STRING)) {
 			return null;

@@ -2,6 +2,10 @@
 
 namespace Kiri\Rpc;
 
+use Exception;
+use Kiri\Exception\NotFindClassException;
+use ReflectionException;
+
 class Registry
 {
 	// KV
@@ -46,6 +50,19 @@ class Registry
 	const PERMISSION_READWRITE = 2;
 
 	const DEFAULT_HTTP_TIMEOUT = 30;
+
+
+	/**
+	 * @param $name
+	 * @return array
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	public function getService($name): array
+	{
+		return di(Client::class)->get($name);
+	}
 
 
 }
