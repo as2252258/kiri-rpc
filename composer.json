@@ -12,7 +12,7 @@
     "php": ">=8.0",
     "ext-json": "*",
     "ext-rdkafka": "*",
-    "psr/event-dispatcher": "^1.0"
+    "google/protobuf": "^3.17"
   },
   "autoload": {
     "psr-4": {

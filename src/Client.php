@@ -3,7 +3,7 @@
 namespace Kiri\Rpc;
 
 use Exception;
-use Swoole\Coroutine\Http\Client as CoroutineClient;
+use Swoole\Coroutine\Http\Handler\Client as CoroutineClient;
 
 class Client
 {
