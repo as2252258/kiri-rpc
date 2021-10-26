@@ -11,8 +11,7 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "ext-rdkafka": "*",
-    "google/protobuf": "^3.17"
+    "sensiolabs/consul-php-sdk": "v4.1.1"
   },
   "autoload": {
     "psr-4": {

@@ -1,0 +1,37 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Yii template
+assets/*
+!assets/.gitignore
+protected/runtime/*
+!protected/runtime/.gitignore
+protected/data/*.db
+themes/classic/views/
+
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+db/
+async-queue/
+
+composer.lock
+
+*.log
+commands/result
+config/setting.php
+tests/
+vendor/
+runtime/
+
+*.xml
+*.lock
+
+oot
+d
+
+composer.lock
