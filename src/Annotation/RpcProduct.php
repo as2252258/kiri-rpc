@@ -28,7 +28,6 @@ use ReflectionException;
 	 * @param mixed $class
 	 * @param mixed|string $method
 	 * @return mixed
-	 * @throws ReflectionException
 	 */
 	public function execute(mixed $class, mixed $method = ''): mixed
 	{
