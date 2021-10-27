@@ -11,12 +11,12 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "sensiolabs/consul-php-sdk": "v4.1.1"
+    "game-worker/kiri-consul": "dev-master"
   },
   "autoload": {
     "psr-4": {
       "Kiri\\Rpc\\": "src/"
-     }
+    }
   },
   "require-dev": {
   }
