@@ -2,12 +2,12 @@
 
 namespace Kiri\Rpc;
 
+use Annotation\Inject;
 use Exception;
 use Http\Message\Response;
 use Http\Message\Stream;
 use Kiri\Abstracts\Config;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -20,6 +20,7 @@ class JsonRpcPoolTransporter implements ClientInterface
 	use TraitTransporter;
 
 
+	#[Inject(ClientPool::class)]
 	public ClientPool $pool;
 
 
@@ -27,7 +28,6 @@ class JsonRpcPoolTransporter implements ClientInterface
 
 
 	/**
-	 * @throws ConfigException
 	 */
 	public function init()
 	{
@@ -58,7 +58,8 @@ class JsonRpcPoolTransporter implements ClientInterface
 	 */
 	private function getClient(): Client|\Swoole\Client
 	{
-		return $this->pool->get(self::POOL_NAME, function () {
+		$this->config['pool'] = Config::get('rpc.pool', ['max' => 10, 'min' => 1, 'waite' => 60]);
+		return $this->pool->get($this->config, function () {
 			return $this->newClient();
 		});
 	}
