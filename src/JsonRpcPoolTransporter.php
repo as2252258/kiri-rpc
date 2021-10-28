@@ -49,7 +49,7 @@ class JsonRpcPoolTransporter implements ClientInterface
 
 		$response = $this->request($client = $this->getClient(), $content, false);
 
-		$this->pool->push(self::POOL_NAME, $client);
+		$this->pool->push($client, $this->config['ServiceAddress'], $this->config['ServicePort']);
 
 		return (new Response())->withBody(new Stream($response));
 	}
