@@ -32,11 +32,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	#[Inject(Annotation::class)]
 	public Annotation $annotation;
 
-
-	#[Inject(ContainerInterface::class)]
-	public ContainerInterface $container;
-
-
 	/**
 	 *
 	 * @throws \Exception
@@ -61,12 +56,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 					$item->execute($class, $method);
 				}
 			}
-		}
-		$config = Config::get('rpc.pool', null);
-		if (!is_null($config)) {
-			$this->container->mapping(RpcClientInterface::class, JsonRpcPoolTransporter::class);
-		} else {
-			$this->container->mapping(RpcClientInterface::class, JsonRpcTransporter::class);
 		}
 	}
 

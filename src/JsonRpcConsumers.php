@@ -128,34 +128,4 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		return ['ServiceAddress' => '127.0.0.1', 'ServicePort' => 9526];
 	}
 
-
-	/**
-	 * @param $config
-	 * @return Coroutine\Client
-	 * @throws Exception
-	 */
-	private function clientOnCoroutine($config): Coroutine\Client
-	{
-		$client = new Coroutine\Client(SWOOLE_SOCK_TCP);
-		if (!$client->connect($config['ServiceAddress'], $config['ServicePort'], 60)) {
-			throw new Exception('connect fail.');
-		}
-		return $client;
-	}
-
-
-	/**
-	 * @param $config
-	 * @return Client
-	 * @throws Exception
-	 */
-	private function clientNotCoroutine($config): Client
-	{
-		$client = new Client(SWOOLE_SOCK_TCP);
-		if (!$client->connect($config['ServiceAddress'], $config['ServicePort'], 60)) {
-			throw new Exception('connect fail.');
-		}
-		return $client;
-	}
-
 }

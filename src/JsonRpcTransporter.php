@@ -27,9 +27,10 @@ class JsonRpcTransporter implements ClientInterface
 	public function sendRequest(RequestInterface $request): ResponseInterface
 	{
 		$content = $request->getBody()->getContents();
-		return (new Response())->withBody(
-			new Stream($this->request($this->newClient(), $content))
-		);
+
+		$response = $this->request($this->newClient(), $content, true);
+
+		return (new Response())->withBody(new Stream($response));
 	}
 
 
