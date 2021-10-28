@@ -4,9 +4,14 @@ namespace Kiri\Rpc;
 
 
 use Exception;
-use Kiri\Context;
+use Http\Message\ServerRequest;
+use Http\Message\Stream;
 use Kiri\Core\Number;
+use Kiri\Kiri;
 use Kiri\Pool\Pool;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Swoole\Client;
 use Swoole\Coroutine;
 
@@ -31,18 +36,31 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 * @param mixed $data
 	 * @param string $version
 	 * @throws Exception
+	 * @throws ClientExceptionInterface
 	 */
 	public function notify(string $method, mixed $data, string $version = '2.0'): void
 	{
 		$config = $this->get_consul($this->name);
-		if (Context::inCoroutine()) {
-			$client = $this->clientOnCoroutine($config);
-		} else {
-			$client = $this->clientNotCoroutine($config);
-		}
-		$client->send(json_encode(['jsonrpc' => $version, 'service' => $this->name, 'method' => $method, 'params' => $data]));
-		$client->recv(1);
-		$client->close();
+		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
+		$transporter->withConfig($config)->sendRequest(
+			$this->requestBody([
+				'jsonrpc' => $version,
+				'service' => $this->name,
+				'method'  => $method,
+				'params'  => $data,
+			])
+		);
+	}
+
+
+	/**
+	 * @param array $data
+	 * @return ServerRequestInterface
+	 */
+	private function requestBody(array $data): ServerRequestInterface
+	{
+		$server = Kiri::getDi()->get(ServerRequest::class);
+		return $server->withBody(new Stream(json_encode($data)));
 	}
 
 
@@ -53,43 +71,39 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 * @param string $id
 	 * @return mixed
 	 * @throws Exception
+	 * @throws ClientExceptionInterface
 	 */
-	public function get(string $method, mixed $data, string $version = '2.0', string $id = ''): mixed
+	public function get(string $method, mixed $data, string $version = '2.0', string $id = ''): ResponseInterface
 	{
-		$config = $this->get_consul($this->name);
-		if (Context::inCoroutine()) {
-			$client = $this->clientOnCoroutine($config);
-		} else {
-			$client = $this->clientNotCoroutine($config);
-		}
-
 		if (empty($id)) $id = Number::create(time());
 
-		$client->send(json_encode(['jsonrpc' => $version, 'service' => $this->name, 'method' => $method, 'params' => $data, 'id' => $id]));
-		$read = $client->recv();
-		$client->close();
-		return json_decode($read, true);
+		$config = $this->get_consul($this->name);
+		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
+		return $transporter->withConfig($config)->sendRequest(
+			$this->requestBody([
+				'jsonrpc' => $version,
+				'service' => $this->name,
+				'method'  => $method,
+				'params'  => $data,
+				'id'      => $id
+			])
+		);
 	}
 
 
 	/**
-	 * @param string $service
 	 * @param array $data
 	 * @return mixed
+	 * @throws ClientExceptionInterface
 	 * @throws Exception
 	 */
-	public function batch(string $service, array $data): mixed
+	public function batch(array $data): mixed
 	{
-		$config = $this->get_consul($service);
-		if (Context::inCoroutine()) {
-			$client = $this->clientOnCoroutine($config);
-		} else {
-			$client = $this->clientNotCoroutine($config);
-		}
-		$client->send(json_encode($data, true));
-		$read = $client->recv();
-		$client->close();
-		return json_decode($read, true);
+		$config = $this->get_consul($this->name);
+		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
+		return $transporter->withConfig($config)->sendRequest(
+			$this->requestBody($data)
+		);
 	}
 
 

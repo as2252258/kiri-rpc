@@ -6,6 +6,8 @@ use Annotation\Annotation;
 use Annotation\Inject;
 use Http\Handler\Router;
 use Kiri\Abstracts\Component;
+use Kiri\Abstracts\Config;
+use Kiri\Di\ContainerInterface;
 use Kiri\Di\NoteManager;
 use Kiri\Kiri;
 use Server\SInterface\OnCloseInterface;
@@ -29,6 +31,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	#[Inject(Annotation::class)]
 	public Annotation $annotation;
+
+
+	#[Inject(ContainerInterface::class)]
+	public ContainerInterface $container;
 
 
 	/**
@@ -55,6 +61,12 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 					$item->execute($class, $method);
 				}
 			}
+		}
+		$config = Config::get('rpc.pool', null);
+		if (!is_null($config)) {
+			$this->container->mapping(RpcClientInterface::class, JsonRpcPoolTransporter::class);
+		} else {
+			$this->container->mapping(RpcClientInterface::class, JsonRpcTransporter::class);
 		}
 	}
 
