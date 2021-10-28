@@ -172,9 +172,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	{
 		$controller = Kiri::getDi()->get($handler[0]);
 
-		$params = array_merge($params, $data['params']);
-
-		$dispatcher = $controller->{$handler[1]}(...$params);
+		$dispatcher = $controller->{$handler[1]}(...$data['params']);
 
 		return ['jsonrpc' => '2.0', 'result' => $dispatcher, 'id' => $data['id'] ?? null];
 	}

@@ -95,13 +95,15 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 */
 	private function get_consul($service): array
 	{
-		$sf = Kiri::getDi()->get(Catalog::class);
+//		$sf = Kiri::getDi()->get(Catalog::class);
+//
+//		$content = $sf->service($service)->getBody()->getContents();
+//
+//		$content = json_decode($content, true);
+//
+//		return $content[array_rand($content)];
 
-		$content = $sf->service($service)->getBody()->getContents();
-
-		$content = json_decode($content, true);
-
-		return $content[array_rand($content)];
+		return ['ServiceAddress' => '127.0.0.1', 'ServicePort' => 9526];
 	}
 
 
