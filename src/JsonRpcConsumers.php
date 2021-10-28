@@ -39,6 +39,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 			$client = $this->clientNotCoroutine($config);
 		}
 		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data]));
+		$client->recv(1);
 		$client->close();
 	}
 
