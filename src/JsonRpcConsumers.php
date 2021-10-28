@@ -14,7 +14,7 @@ use Swoole\Coroutine;
 /**
  *
  */
-abstract class Consumers implements OnRpcConsumerInterface
+abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 {
 
 
