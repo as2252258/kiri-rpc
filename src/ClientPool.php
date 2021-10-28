@@ -45,7 +45,7 @@ class ClientPool extends Component
 
 		$pool = $config['pool'] ?? ['min' => 1, 'max' => 100];
 
-		$clients = $this->getPool()->get($coroutineName, $callback(), $pool['min'] ?? 1);
+		$clients = $this->getPool()->get($coroutineName, $callback, $pool['min'] ?? 1);
 		return Context::setContext($coroutineName, $clients);
 	}
 
