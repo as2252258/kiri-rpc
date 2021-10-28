@@ -97,11 +97,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function batchDispatch(Server $server, int $fd, array $data): void
 	{
 		if (isset($data['jsonrpc'])) {
-			$dispatch = $this->dispatch($data);
-			if (!isset($data['id'])) {
-				return;
-			}
-			$result = json_encode($dispatch, JSON_UNESCAPED_UNICODE);
+			$result = json_encode($this->dispatch($data), JSON_UNESCAPED_UNICODE);
 		} else {
 			$channel = new Channel($total = count($data));
 			foreach ($data as $datum) {
@@ -109,11 +105,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			}
 			$result = [];
 			for ($i = 0; $i < $total; $i++) {
-				$params = $channel->pop();
-				if (empty($params)) {
-					continue;
-				}
-				$result[] = $params;
+				$result[] = $channel->pop();
 			}
 		}
 		$server->send($fd, json_encode($result, JSON_UNESCAPED_UNICODE));
@@ -132,11 +124,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			} else if (!isset($datum['method'])) {
 				$channel->push($this->failure(-32700, 'Parse error语法解析错误'));
 			} else {
-				$dispatch = $this->dispatch($datum);
-				if (!isset($dispatch['id'])) {
-					$dispatch = null;
-				}
-				$channel->push($dispatch);
+				$channel->push($this->dispatch($datum));
 			}
 		});
 	}
