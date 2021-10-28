@@ -3,31 +3,28 @@
 namespace Kiri\Rpc;
 
 
+use Annotation\Target;
 use Http\Constrict\RequestInterface;
+use Http\Handler\Controller;
 use Kiri\Rpc\Annotation\JsonRpc;
 
 
 /**
  *
  */
-#[JsonRpc(method: 'test.service', version: '2.0')]
-class TestRpcService implements OnJsonRpcInterface
+#[Target]
+#[JsonRpc(method: 'test', version: '2.0')]
+class TestRpcService extends Controller implements OnJsonRpcInterface
 {
 
 
 	/**
-	 * @var RequestInterface
-	 */
-	public RequestInterface $request;
-
-
-	/**
-	 * @param int $i
-	 * @param int $b
 	 * @return int
 	 */
-	public function execute(int $i, int $b): int
+	public function execute(): int
 	{
-		return $i + $b;
+		return $this->request->int('a') + $this->request->int('b');
 	}
+
+
 }
