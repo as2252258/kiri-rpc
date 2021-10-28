@@ -6,8 +6,11 @@ use Annotation\Inject;
 use Http\Constrict\ResponseInterface;
 use Http\Handler\Abstracts\HandlerManager;
 use Http\Handler\Dispatcher;
+use Http\Handler\Handler;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
+use Kiri\Kiri;
+use ReflectionMethod;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
 use Server\SInterface\OnReceiveInterface;
@@ -133,14 +136,22 @@ class RpcJsonp implements OnConnectInterface, OnReceiveInterface, OnCloseInterfa
 
 
 	/**
-	 * @param $handler
+	 * @param Handler $handler
 	 * @param $data
 	 * @return array
 	 * @throws \Exception
 	 */
-	private function handler($handler, $data): array
+	private function handler(Handler $handler, $data): array
 	{
-		$dispatcher = (new Dispatcher($handler, $handler->_middlewares))->handle(new ServerRequest());
+		$handler->params = [];
+
+		/** @var  ReflectionMethod $reflection */
+		$reflection = Kiri::getDi()->getReflectMethod($handler->callback[0]::class, $handler->callback[1]);
+		foreach ($reflection->getParameters() as $value) {
+			$handler->params[] = $data['params'][$value->getName()] ?? null;
+		}
+
+		$dispatcher = (new Dispatcher($handler, $handler->_middlewares))->handle((new ServerRequest())->withData($data['params']));
 		if ($dispatcher instanceof ResponseInterface) {
 			$dispatcher = json_decode($dispatcher->getBody()->getContents(), true);
 		}
