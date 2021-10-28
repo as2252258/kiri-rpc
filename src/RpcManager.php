@@ -26,10 +26,10 @@ class RpcManager
 
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
+//
+//			$params = Kiri::getDi()->getMethodParameters($class, $methodName);
 
-			$params = Kiri::getDi()->getMethodParameters($class, $methodName);
-
-			static::$_rpc[$name][$methodName] = [[$class, $methodName], $params];
+			static::$_rpc[$name][$methodName] = [[$class, $methodName], null];
 		}
 		return true;
 	}

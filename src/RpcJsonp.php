@@ -97,7 +97,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function batchDispatch(Server $server, int $fd, array $data): void
 	{
 		if (isset($data['jsonrpc'])) {
-			$result = json_encode($this->dispatch($data), JSON_UNESCAPED_UNICODE);
+			$dispatch = $this->dispatch($data);
+			if (!isset($data['id'])) {
+				$dispatch = [1];
+			}
+			$result = json_encode($dispatch, JSON_UNESCAPED_UNICODE);
 		} else {
 			$channel = new Channel($total = count($data));
 			foreach ($data as $datum) {
@@ -124,7 +128,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			} else if (!isset($datum['method'])) {
 				$channel->push($this->failure(-32700, 'Parse error语法解析错误'));
 			} else {
-				$channel->push($this->dispatch($datum));
+				$dispatch = $this->dispatch($datum);
+				if (!isset($dispatch['id'])) {
+					$dispatch = [1];
+				}
+				$channel->push($dispatch);
 			}
 		});
 	}
@@ -141,7 +149,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
-				return $this->handler($handler, $params, $data);
+				return $this->handler($handler, $data);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -152,11 +160,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param array $handler
-	 * @param array $params
 	 * @param $data
 	 * @return array
 	 */
-	private function handler(array $handler, array $params, $data): array
+	private function handler(array $handler, $data): array
 	{
 		$controller = Kiri::getDi()->get($handler[0]);
 
