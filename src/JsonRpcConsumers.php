@@ -4,9 +4,8 @@ namespace Kiri\Rpc;
 
 
 use Exception;
-use Kiri\Consul\Catalog\Catalog;
 use Kiri\Context;
-use Kiri\Kiri;
+use Kiri\Core\Number;
 use Kiri\Pool\Pool;
 use Swoole\Client;
 use Swoole\Coroutine;
@@ -61,6 +60,9 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		} else {
 			$client = $this->clientNotCoroutine($config);
 		}
+
+		if (empty($id)) $id = Number::create(time());
+
 		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data, 'id' => $id]));
 		$read = $client->recv();
 		$client->close();
