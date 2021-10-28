@@ -143,13 +143,14 @@ class RpcJsonp implements OnConnectInterface, OnReceiveInterface, OnCloseInterfa
 	 */
 	private function handler(Handler $handler, $data): array
 	{
-		$handler->params = [];
-
 		/** @var  ReflectionMethod $reflection */
 		$reflection = Kiri::getDi()->getReflectMethod($handler->callback[0]::class, $handler->callback[1]);
+
+		$params = [];
 		foreach ($reflection->getParameters() as $value) {
-			$handler->params[] = $data['params'][$value->getName()] ?? null;
+			$params[] = $data['params'][$value->getName()] ?? null;
 		}
+		$handler->params = $params;
 
 		$dispatcher = (new Dispatcher($handler, $handler->_middlewares))->handle((new ServerRequest())->withData($data['params']));
 		if ($dispatcher instanceof ResponseInterface) {
