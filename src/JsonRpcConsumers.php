@@ -96,9 +96,13 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	/**
 	 * @param $service
 	 * @return array
+	 * @throws Exception
 	 */
 	private function get_consul($service): array
 	{
+		if (empty($service)) {
+			throw new Exception('You need set rpc service name if used.');
+		}
 //		$sf = Kiri::getDi()->get(Catalog::class);
 //
 //		$content = $sf->service($service)->getBody()->getContents();
