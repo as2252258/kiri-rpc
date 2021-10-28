@@ -23,29 +23,30 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	public Pool $pool;
 
 
+	protected string $name = '';
+
+
 	/**
-	 * @param string $service
 	 * @param string $method
 	 * @param mixed $data
 	 * @param string $version
 	 * @throws Exception
 	 */
-	public function notify(string $service, string $method, mixed $data, string $version = '2.0'): void
+	public function notify(string $method, mixed $data, string $version = '2.0'): void
 	{
-		$config = $this->get_consul($service);
+		$config = $this->get_consul($this->name);
 		if (Context::inCoroutine()) {
 			$client = $this->clientOnCoroutine($config);
 		} else {
 			$client = $this->clientNotCoroutine($config);
 		}
-		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data]));
+		$client->send(json_encode(['jsonrpc' => $version, 'service' => $this->name, 'method' => $method, 'params' => $data]));
 		$client->recv(1);
 		$client->close();
 	}
 
 
 	/**
-	 * @param string $service
 	 * @param string $method
 	 * @param mixed $data
 	 * @param string $version
@@ -53,9 +54,9 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 * @return mixed
 	 * @throws Exception
 	 */
-	public function get(string $service, string $method, mixed $data, string $version = '2.0', string $id = ''): mixed
+	public function get(string $method, mixed $data, string $version = '2.0', string $id = ''): mixed
 	{
-		$config = $this->get_consul($service);
+		$config = $this->get_consul($this->name);
 		if (Context::inCoroutine()) {
 			$client = $this->clientOnCoroutine($config);
 		} else {
@@ -64,7 +65,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 
 		if (empty($id)) $id = Number::create(time());
 
-		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data, 'id' => $id]));
+		$client->send(json_encode(['jsonrpc' => $version, 'service' => $this->name, 'method' => $method, 'params' => $data, 'id' => $id]));
 		$read = $client->recv();
 		$client->close();
 		return json_decode($read, true);
