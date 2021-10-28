@@ -31,10 +31,6 @@ class JsonRpcPoolTransporter implements ClientInterface
 	 */
 	public function init()
 	{
-		$config = Config::get('rpc.pool', null);
-
-		$this->pool = Kiri::getDi()->get(ClientPool::class, [], $config);
-		$this->pool->initConnections(self::POOL_NAME, true, $config['max']);
 	}
 
 
