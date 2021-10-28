@@ -39,7 +39,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		} else {
 			$client = $this->clientNotCoroutine($config);
 		}
-		$client->send(json_encode(['jsonrpc' => $version, 'method' => $method, 'params' => $data]));
+		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data]));
 		$client->close();
 	}
 
@@ -61,7 +61,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		} else {
 			$client = $this->clientNotCoroutine($config);
 		}
-		$client->send(json_encode(['jsonrpc' => $version, 'method' => $method, 'params' => $data, 'id' => $id]));
+		$client->send(json_encode(['jsonrpc' => $version, 'service' => $service, 'method' => $method, 'params' => $data, 'id' => $id]));
 		$read = $client->recv();
 		$client->close();
 		return json_decode($read, true);

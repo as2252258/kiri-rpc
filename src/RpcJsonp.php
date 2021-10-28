@@ -4,9 +4,7 @@ namespace Kiri\Rpc;
 
 use Annotation\Inject;
 use Http\Constrict\ResponseInterface;
-use Http\Handler\Abstracts\HandlerManager;
 use Http\Handler\Dispatcher;
-use Http\Handler\Handler;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
 use Kiri\Kiri;
@@ -120,13 +118,11 @@ class RpcJsonp implements OnConnectInterface, OnReceiveInterface, OnCloseInterfa
 	private function dispatch($data): array
 	{
 		try {
-			$handler = HandlerManager::get($data['method'], 'json-rpc');
-			if (is_integer($handler)) {
-				throw new \Exception('Invalid Request无效请求', -32600);
-			} else if (is_null($handler)) {
+			[$handler, $params] = RpcManager::get($data['service'], $data['method']);
+			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
-				return $this->handler($handler, $data);
+				return $this->handler($handler, $params, $data);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -136,26 +132,19 @@ class RpcJsonp implements OnConnectInterface, OnReceiveInterface, OnCloseInterfa
 
 
 	/**
-	 * @param Handler $handler
+	 * @param array $handler
+	 * @param array $params
 	 * @param $data
 	 * @return array
-	 * @throws \Exception
 	 */
-	private function handler(Handler $handler, $data): array
+	private function handler(array $handler, array $params, $data): array
 	{
-		/** @var  ReflectionMethod $reflection */
-		$reflection = Kiri::getDi()->getReflectMethod($handler->callback[0]::class, $handler->callback[1]);
+		$controller = Kiri::getDi()->get($handler[0]);
 
-		$params = [];
-		foreach ($reflection->getParameters() as $value) {
-			$params[] = $data['params'][$value->getName()] ?? null;
-		}
-		$handler->params = $params;
+		$params = array_merge($params, $data['params']);
 
-		$dispatcher = (new Dispatcher($handler, $handler->_middlewares))->handle((new ServerRequest())->withData($data['params']));
-		if ($dispatcher instanceof ResponseInterface) {
-			$dispatcher = json_decode($dispatcher->getBody()->getContents(), true);
-		}
+		$dispatcher = $controller->{$handler[1]}(...$params);
+
 		return ['jsonrpc' => '2.0', 'result' => $dispatcher, 'id' => $data['id'] ?? null];
 	}
 
