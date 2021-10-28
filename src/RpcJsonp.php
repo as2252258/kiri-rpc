@@ -2,13 +2,12 @@
 
 namespace Kiri\Rpc;
 
+use Annotation\Annotation;
 use Annotation\Inject;
-use Http\Constrict\ResponseInterface;
-use Http\Handler\Dispatcher;
 use Http\Handler\Router;
-use Http\Message\ServerRequest;
+use Kiri\Abstracts\Component;
+use Kiri\Di\NoteManager;
 use Kiri\Kiri;
-use ReflectionMethod;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
 use Server\SInterface\OnReceiveInterface;
@@ -20,12 +19,44 @@ use Swoole\Server;
 /**
  *
  */
-class RpcJsonp implements OnConnectInterface, OnReceiveInterface, OnCloseInterface
+class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterface, OnCloseInterface
 {
 
 
 	#[Inject(Router::class)]
 	public Router $router;
+
+
+	#[Inject(Annotation::class)]
+	public Annotation $annotation;
+
+
+	/**
+	 *
+	 * @throws \Exception
+	 */
+	public function init(): void
+	{
+		$this->annotation->read(APP_PATH . 'rpc', 'Rpc');
+
+		$data = $this->annotation->runtime(APP_PATH . 'rpc');
+
+		$di = Kiri::getDi();
+		foreach ($data as $class) {
+			foreach (NoteManager::getTargetNote($class) as $value) {
+				$value->execute($class);
+			}
+			$methods = $di->getMethodAttribute($class);
+			foreach ($methods as $method => $attribute) {
+				if (empty($attribute)) {
+					continue;
+				}
+				foreach ($attribute as $item) {
+					$item->execute($class, $method);
+				}
+			}
+		}
+	}
 
 
 	/**
