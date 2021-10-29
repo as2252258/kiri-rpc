@@ -82,7 +82,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			"EnableTagOverride" => false,
 			"Check"             => [
 				"DeregisterCriticalServiceAfter" => "90m",
-				"Args"                           => ["1"],
+				"Args"                           => ["curl -X GET http://127.0.0.1:9527/"],
 				"Interval"                       => "10s",
 				"Timeout"                        => "5s"
 			],
