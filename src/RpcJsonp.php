@@ -82,7 +82,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			"EnableTagOverride" => false,
 			"Check"             => [
 				"DeregisterCriticalServiceAfter" => "90m",
-				//				"Args"                           => ["/usr/local/bin/check_redis.py"],
+				"Args"                           => ["1"],
 				"Interval"                       => "10s",
 				"Timeout"                        => "5s"
 			],
