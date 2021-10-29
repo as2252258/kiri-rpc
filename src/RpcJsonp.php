@@ -69,7 +69,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	{
 		$config = Config::get('rpc');
 
-		$agent = Kiri::getDi()->get(Agent::class, [], ['host' => '127.0.0.1', 'port' => 9500]);
+		$agent = Kiri::getDi()->get(Agent::class);
 		$data = $agent->service->register([
 			"ID"                => $config['name'] ?? 'test-name',
 			"Name"              => "redis",
