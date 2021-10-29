@@ -9,8 +9,11 @@ use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Di\NoteManager;
+use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Server\Events\OnStart;
+use Server\ServerManager;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
 use Server\SInterface\OnReceiveInterface;
@@ -33,12 +36,18 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	#[Inject(Annotation::class)]
 	public Annotation $annotation;
 
+
+	#[Inject(EventProvider::class)]
+	public EventProvider $eventProvider;
+
 	/**
 	 *
 	 * @throws \Exception
 	 */
 	public function init(): void
 	{
+		$this->eventProvider->on(OnStart::class, [$this, 'register']);
+
 		$this->annotation->read(APP_PATH . 'rpc', 'Rpc');
 
 		$data = $this->annotation->runtime(APP_PATH . 'rpc');
@@ -58,21 +67,20 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 				}
 			}
 		}
-		$this->register();
 	}
 
 
 	/**
 	 * @throws ConfigException
 	 */
-	public function register()
+	public function register(Server $server)
 	{
 		$config = Config::get('rpc');
 
 		$agent = Kiri::getDi()->get(Agent::class);
 		$data = $agent->service->register($config['registry']['config']);
 		if ($data->getStatusCode() != 200) {
-			exit($data->getBody()->getContents());
+			$server->shutdown();
 		}
 	}
 
