@@ -13,7 +13,6 @@ use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Server\Events\OnStart;
-use Server\ServerManager;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
 use Server\SInterface\OnReceiveInterface;
@@ -48,25 +47,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	{
 		$this->eventProvider->on(OnStart::class, [$this, 'register']);
 
-		$this->annotation->read(APP_PATH . 'rpc', 'Rpc');
-
-		$data = $this->annotation->runtime(APP_PATH . 'rpc');
-
-		$di = Kiri::getDi();
-		foreach ($data as $class) {
-			foreach (NoteManager::getTargetNote($class) as $value) {
-				$value->execute($class);
-			}
-			$methods = $di->getMethodAttribute($class);
-			foreach ($methods as $method => $attribute) {
-				if (empty($attribute)) {
-					continue;
-				}
-				foreach ($attribute as $item) {
-					$item->execute($class, $method);
-				}
-			}
-		}
+		scan_directory(APP_PATH . 'rpc', 'Rpc');
 	}
 
 
