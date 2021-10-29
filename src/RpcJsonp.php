@@ -63,10 +63,12 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
-		$config = Config::get('rpc');
+		$config = Config::get('rpc.registry.config');
+
+		$config = array_change_key_case($config, CASE_LOWER);
 
 		$agent = $this->container->get(Agent::class);
-		$agent->service->deregister($config['registry']['config']['ID']);
+		$agent->service->deregister($config['id']);
 	}
 
 
