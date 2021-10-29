@@ -50,7 +50,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function init(): void
 	{
-		$this->eventProvider->on(OnStart::class, [$this, 'register']);
 		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'Rpc');
