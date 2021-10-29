@@ -6,8 +6,10 @@ use Annotation\Annotation;
 use Annotation\Inject;
 use Http\Handler\Router;
 use Kiri\Abstracts\Component;
+use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Di\NoteManager;
+use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
@@ -60,22 +62,27 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	}
 
 
+	/**
+	 * @throws ConfigException
+	 */
 	public function register()
 	{
+		$config = Config::get('rpc');
+
 		$agent = Kiri::getDi()->get(Agent::class);
 		$agent->service->register([
-			"ID"                => "redis1",
+			"ID"                => $config['name'] ?? 'test-name',
 			"Name"              => "redis",
 			"Tags"              => ["primary", "v1"],
-			"Address"           => "127.0.0.1",
-			"Port"              => 8000,
+			"Address"           => Kiri::localhost(),
+			"Port"              => $config['port'],
 			"Meta"              => [
 				"redis_version" => "4.0"
 			],
 			"EnableTagOverride" => false,
 			"Check"             => [
 				"DeregisterCriticalServiceAfter" => "90m",
-//				"Args"                           => ["/usr/local/bin/check_redis.py"],
+				//				"Args"                           => ["/usr/local/bin/check_redis.py"],
 				"Interval"                       => "10s",
 				"Timeout"                        => "5s"
 			],
