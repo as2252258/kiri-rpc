@@ -3,6 +3,10 @@
 namespace Kiri\Rpc\Annotation;
 
 use Annotation\Attribute;
+use Kiri\Abstracts\Config;
+use Kiri\Consul\Agent;
+use Kiri\Exception\ConfigException;
+use Kiri\Kiri;
 use Kiri\Rpc\RpcManager;
 use ReflectionException;
 
@@ -12,10 +16,15 @@ use ReflectionException;
 
 	/**
 	 * @param string $method
-	 * @param string $version
-	 * @param string $protocol
+	 * @param string $driver
+	 * @param array $checkOptions
 	 */
-	public function __construct(public string $method, public string $version = '2.0', public string $protocol = 'json')
+	public function __construct(public string $method, public string $driver, public array $checkOptions = [
+		"DeregisterCriticalServiceAfter" => "1m",
+		"Http"                           => "http://127.0.0.1:9527",
+		"Interval"                       => "1s",
+		"Timeout"                        => "1s"
+	])
 	{
 
 	}
@@ -26,10 +35,39 @@ use ReflectionException;
 	 * @param mixed|string $method
 	 * @return mixed
 	 * @throws ReflectionException
+	 * @throws ConfigException
 	 */
 	public function execute(mixed $class, mixed $method = ''): bool
 	{
-		return RpcManager::add($this->method, $class);
+		$default = $this->create();
+		$agent = Kiri::getDi()->get(Agent::class);
+		$data = $agent->service->register($default);
+		if ($data->getStatusCode() != 200) {
+			exit($data->getBody()->getContents());
+		}
+		return RpcManager::add($this->method, $class, $default['id']);
+	}
+
+
+	/**
+	 * @throws ConfigException
+	 */
+	protected function create(): array
+	{
+		$content = swoole_get_local_ip()['eth0'];
+		return [
+			"id"                => uniqid("rpc.json.{$this->method}."),
+			"name"              => $this->method,
+			"address"           => swoole_get_local_ip()['eth0'],
+			"port"              => 9526,
+			"enableTagOverride" => true,
+			"check"             => [
+				"DeregisterCriticalServiceAfter" => "1m",
+				"TCP"                            => $content . ":" . Config::get('rpc.port'),
+				"Interval"                       => "1s",
+				"Timeout"                        => "1s"
+			]
+		];
 	}
 
 

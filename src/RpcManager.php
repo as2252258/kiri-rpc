@@ -14,10 +14,11 @@ class RpcManager
 	/**
 	 * @param string $name
 	 * @param string $class
+	 * @param string $serviceId
 	 * @return bool
 	 * @throws ReflectionException
 	 */
-	public static function add(string $name, string $class): bool
+	public static function add(string $name, string $class, string $serviceId): bool
 	{
 		$methods = Kiri::getDi()->getReflect($class);
 		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
@@ -27,9 +28,23 @@ class RpcManager
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
 
-			static::$_rpc[$name][$methodName] = [[$class, $methodName], null];
+			static::$_rpc[$name][$methodName] = [[$class, $methodName], null, $serviceId];
 		}
 		return true;
+	}
+
+
+	public static function doneList(): array
+	{
+		$array = [];
+		foreach (static::$_rpc as $list) {
+
+			foreach ($list as $value) {
+				$array[] = $value[2];
+			}
+
+		}
+		return $array;
 	}
 
 
@@ -40,7 +55,7 @@ class RpcManager
 	 */
 	public static function get(string $name, string $method): array
 	{
-		return static::$_rpc[$name][$method] ?? [null, null];
+		return static::$_rpc[$name][$method] ?? [null, null, null];
 	}
 
 }

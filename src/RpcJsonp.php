@@ -59,16 +59,14 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param OnBeforeShutdown $beforeShutdown
-	 * @throws ConfigException
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
-		$config = Config::get('rpc.registry.config');
-
-		$config = array_change_key_case($config, CASE_LOWER);
-
+		$doneList = RpcManager::doneList();
 		$agent = $this->container->get(Agent::class);
-		$agent->service->deregister($config['id']);
+		foreach ($doneList as $value) {
+			$agent->service->deregister($value);
+		}
 	}
 
 
@@ -173,7 +171,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function dispatch($data): array
 	{
 		try {
-			[$handler, $params] = RpcManager::get($data['service'], $data['method']);
+			[$handler, $params, $_] = RpcManager::get($data['service'], $data['method']);
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
