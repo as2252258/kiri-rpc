@@ -73,14 +73,15 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	/**
 	 * @throws ConfigException
 	 */
-	public function register(Server $server)
+	public function register(OnStart $server)
 	{
+		var_dump($server);
 		$config = Config::get('rpc');
 
 		$agent = Kiri::getDi()->get(Agent::class);
 		$data = $agent->service->register($config['registry']['config']);
 		if ($data->getStatusCode() != 200) {
-			$server->shutdown();
+			$server->server->shutdown();
 		}
 	}
 
