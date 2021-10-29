@@ -8,10 +8,11 @@ use Http\Handler\Router;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
-use Kiri\Di\NoteManager;
+use Kiri\Di\ContainerInterface;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Server\Events\OnBeforeShutdown;
 use Server\Events\OnStart;
 use Server\SInterface\OnCloseInterface;
 use Server\SInterface\OnConnectInterface;
@@ -39,6 +40,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	#[Inject(EventProvider::class)]
 	public EventProvider $eventProvider;
 
+
+	#[Inject(ContainerInterface::class)]
+	public ContainerInterface $container;
+
 	/**
 	 *
 	 * @throws \Exception
@@ -46,8 +51,22 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function init(): void
 	{
 		$this->eventProvider->on(OnStart::class, [$this, 'register']);
+		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'Rpc');
+	}
+
+
+	/**
+	 * @param OnBeforeShutdown $beforeShutdown
+	 * @throws ConfigException
+	 */
+	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
+	{
+		$config = Config::get('rpc');
+
+		$agent = $this->container->get(Agent::class);
+		$agent->service->deregister($config['registry']['config']['config']);
 	}
 
 
@@ -58,7 +77,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	{
 		$config = Config::get('rpc');
 
-		$agent = Kiri::getDi()->get(Agent::class);
+		$agent = $this->container->get(Agent::class);
 		$data = $agent->service->register($config['registry']['config']);
 		if ($data->getStatusCode() != 200) {
 			$server->server->shutdown();
