@@ -23,12 +23,12 @@ class RpcManager
 		$methods = Kiri::getDi()->getReflect($class);
 		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
 
-		if (!isset(static::$_rpc[$name])) static::$_rpc[$name] = [];
+		if (!isset(static::$_rpc[$name])) static::$_rpc[$name] = ['methods' => [], 'id' => $serviceId];
 
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
 
-			static::$_rpc[$name][$methodName] = [[$class, $methodName], null, $serviceId];
+			static::$_rpc[$name]['methods'][$methodName] = [[$class, $methodName], null];
 		}
 		return true;
 	}
@@ -38,11 +38,7 @@ class RpcManager
 	{
 		$array = [];
 		foreach (static::$_rpc as $list) {
-
-			foreach ($list as $value) {
-				$array[] = $value[2];
-			}
-
+			$array[] = $list['id'];
 		}
 		return $array;
 	}
@@ -55,7 +51,7 @@ class RpcManager
 	 */
 	public static function get(string $name, string $method): array
 	{
-		return static::$_rpc[$name][$method] ?? [null, null, null];
+		return static::$_rpc[$name]['methods'][$method] ?? [null, null];
 	}
 
 }
