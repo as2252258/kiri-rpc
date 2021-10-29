@@ -54,11 +54,11 @@ use ReflectionException;
 	 */
 	protected function create(): array
 	{
-		$content = swoole_get_local_ip()['eth0'];
+		$content = current(swoole_get_local_ip());
 		return [
 			"id"                => uniqid("rpc.json.{$this->method}."),
 			"name"              => $this->method,
-			"address"           => swoole_get_local_ip()['eth0'],
+			"address"           => $content,
 			"port"              => 9526,
 			"enableTagOverride" => true,
 			"check"             => [
