@@ -56,7 +56,7 @@ use ReflectionException;
 	{
 		$content = current(swoole_get_local_ip());
 		return [
-			"id"                => "rpc.json.{$this->method}." . md5(__DIR__) . '.' . md5($content),
+			"id"                => "rpc.json.{$this->method}." . md5(__DIR__ . '.' . md5($content)),
 			"name"              => $this->method,
 			"address"           => $content,
 			"port"              => 9526,
