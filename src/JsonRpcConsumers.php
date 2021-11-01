@@ -6,14 +6,13 @@ namespace Kiri\Rpc;
 use Exception;
 use Http\Message\ServerRequest;
 use Http\Message\Stream;
+use Kiri\Consul\Agent;
 use Kiri\Core\Number;
 use Kiri\Kiri;
 use Kiri\Pool\Pool;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Swoole\Client;
-use Swoole\Coroutine;
 
 /**
  *
@@ -117,15 +116,25 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		if (empty($service)) {
 			throw new Exception('You need set rpc service name if used.');
 		}
-//		$sf = Kiri::getDi()->get(Catalog::class);
-//
-//		$content = $sf->service($service)->getBody()->getContents();
-//
-//		$content = json_decode($content, true);
-//
-//		return $content[array_rand($content)];
+		$sf = Kiri::getDi()->get(Agent::class);
 
-		return ['ServiceAddress' => '127.0.0.1', 'ServicePort' => 9526];
+		$response = $sf->service->list('filter=Service == ' . $service);
+		if ($response->getStatusCode() != 200 || $response->getBody()->getSize() <= 2) {
+			throw new Exception('No microservices found [' . $service . '].');
+		}
+		$array = [];
+
+		$content = json_decode($response->getBody()->getContents(), true);
+		foreach ($content as $value) {
+			$array[] = ['id' => $value['ID'], 'Weights' => $value['Weights']['Passing']];
+		}
+
+		if (count($array) < 2) {
+			$luck = $array[0];
+		} else {
+			$luck = Luckdraw::luck($array, 'Weights');
+		}
+		return ['Address' => $luck['Address'], 'Port' => $luck['Port']];
 	}
 
 }
