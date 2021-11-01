@@ -118,7 +118,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		}
 		$sf = Kiri::getDi()->get(Agent::class);
 
-		$response = $sf->service->list('filter=Service == ' . $service);
+		$response = $sf->service->setQuery('filter=Service == ' . $service)->list();
 		if ($response->getStatusCode() != 200 || $response->getBody()->getSize() <= 2) {
 			throw new Exception('No microservices found [' . $service . '].');
 		}
