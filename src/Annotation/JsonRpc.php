@@ -39,16 +39,14 @@ use ReflectionException;
 	 */
 	public function execute(mixed $class, mixed $method = ''): bool
 	{
-//		$default = $this->create();
-//		$agent = Kiri::getDi()->get(Agent::class);
-//		$data = $agent->service->register($default);
-//		if ($data->getStatusCode() != 200) {
-//			exit($data->getBody()->getContents());
-//		}
-//		return RpcManager::add($this->service, $class, $default['id']);
-        return true;
+		$default = $this->create();
+		$agent = Kiri::getDi()->get(Agent::class);
+		$data = $agent->service->register($default);
+		if ($data->getStatusCode() != 200) {
+			exit($data->getBody()->getContents());
+		}
+		return RpcManager::add($this->service, $class, $default['id']);
 	}
-
 
 
 	/**
