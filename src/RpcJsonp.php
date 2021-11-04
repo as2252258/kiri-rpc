@@ -75,7 +75,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function register(OnStart $server)
 	{
 		$config = Config::get('rpc');
-
 		$agent = $this->container->get(Agent::class);
         $agent->service->register($config['registry']['config']);
 	}
