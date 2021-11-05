@@ -11,7 +11,7 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "game-worker/kiri-consul": "dev-master",
+    "game-worker/kiri-consul": "^v1.0",
     "psr/http-client": "^1.0",
     "psr/http-message": "^1.0"
   },
