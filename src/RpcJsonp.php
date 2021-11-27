@@ -8,7 +8,7 @@ use Http\Handler\Router;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
-use Kiri\Di\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
