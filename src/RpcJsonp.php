@@ -11,6 +11,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Context;
+use Kiri\Core\Json;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
@@ -199,6 +200,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	/**
 	 * @param $params
 	 * @return ServerRequestInterface
+	 * @throws \Exception
 	 */
 	private function createServerRequest($params): ServerRequestInterface
 	{
