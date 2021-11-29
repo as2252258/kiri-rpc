@@ -15,11 +15,11 @@ use ReflectionException;
 
 
 	/**
-	 * @param string $service_name
+	 * @param string $service
 	 * @param string $driver
 	 * @param array $checkOptions
 	 */
-	public function __construct(public string $service_name, public string $driver, public array $checkOptions = [
+	public function __construct(public string $service, public string $driver, public array $checkOptions = [
 		"DeregisterCriticalServiceAfter" => "1m",
 		"Http"                           => "http://127.0.0.1:9527",
 		"Interval"                       => "1s",
@@ -45,7 +45,7 @@ use ReflectionException;
 		if ($data->getStatusCode() != 200) {
 			exit($data->getBody()->getContents());
 		}
-		return RpcManager::add($this->service_name, $class, $default['id']);
+		return RpcManager::add($this->service, $class, $default['id']);
 	}
 
 
@@ -56,8 +56,8 @@ use ReflectionException;
 	{
 		$content = current(swoole_get_local_ip());
 		return [
-			"id"                => "rpc.json.{$this->service_name}." . md5(__DIR__ . '.' . md5($content)),
-			"name"              => $this->service_name,
+			"id"                => "rpc.json.{$this->service}." . md5(__DIR__ . '.' . md5($content)),
+			"name"              => $this->service,
 			"address"           => $content,
 			"port"              => 9526,
 			"enableTagOverride" => true,
