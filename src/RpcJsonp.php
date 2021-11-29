@@ -4,21 +4,25 @@ namespace Kiri\Rpc;
 
 use Annotation\Annotation;
 use Annotation\Inject;
+use Http\Constrict\RequestInterface;
 use Http\Handler\Router;
+use Http\Message\ServerRequest;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
+use Kiri\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Server\Events\OnBeforeShutdown;
-use Server\Events\OnStart;
+use Psr\Http\Message\ServerRequestInterface;
 use Server\Contract\OnCloseInterface;
 use Server\Contract\OnConnectInterface;
 use Server\Contract\OnReceiveInterface;
+use Server\Events\OnBeforeShutdown;
+use Server\Events\OnStart;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
@@ -181,7 +185,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
-				return $this->handler($handler, $data);
+				$PsrRequest = Context::setContext(RequestInterface::class, $this->createServerRequest($params));
+
+				return $this->handler($handler, $PsrRequest);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -191,18 +197,30 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
+	 * @param $params
+	 * @return ServerRequestInterface
+	 */
+	private function createServerRequest($params): ServerRequestInterface
+	{
+		return (new ServerRequest())->withParsedBody($params);
+	}
+
+
+	/**
 	 * @param array $handler
-	 * @param $data
+	 * @param $request
 	 * @return array
 	 * @throws \ReflectionException
 	 */
-	private function handler(array $handler, $data): array
+	private function handler(array $handler, $request): array
 	{
 		$controller = Kiri::getDi()->get($handler[0]);
-
-		$dispatcher = $controller->{$handler[1]}(...$data['params']);
-
-		return ['jsonrpc' => '2.0', 'result' => $dispatcher, 'id' => $data['id'] ?? null];
+		$dispatcher = $controller->{$handler[1]}($request);
+		return [
+			'jsonrpc' => '2.0',
+			'result'  => $dispatcher,
+			'id'      => $data['id'] ?? null
+		];
 	}
 
 
