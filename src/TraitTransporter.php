@@ -14,6 +14,9 @@ trait TraitTransporter
 	protected array $config;
 
 
+	protected array $clients = [];
+
+
 	/**
 	 * @param $config
 	 * @return $this
@@ -48,24 +51,14 @@ trait TraitTransporter
 	 */
 	private function newClient(): Coroutine\Client|Client
 	{
-		if (Context::inCoroutine()) {
-			$client = $this->clientOnCoroutine($this->config);
-		} else {
-			$client = $this->clientNotCoroutine($this->config);
+		$alias = $this->alias($this->config);
+		$client = $this->clients[$alias] ?? null;
+		if (is_null($client)) {
+			$client = Context::inCoroutine() ? new Coroutine\Client(SWOOLE_SOCK_TCP) : new Client(SWOOLE_SOCK_TCP);
+			$this->clients[$alias] = $client;
 		}
-		return $client;
-	}
-
-
-	/**
-	 * @param $config
-	 * @return Coroutine\Client
-	 * @throws Exception
-	 */
-	private function clientOnCoroutine($config): Coroutine\Client
-	{
-		$client = new Coroutine\Client(SWOOLE_SOCK_TCP);
-		if (!$client->connect($config['ServiceAddress'], $config['ServicePort'], 60)) {
+		[$host, $port] = [$this->config['ServiceAddress'], $this->config['ServicePort']];
+		if (!$client->isConnected() && !$client->connect($host, $port, 60)) {
 			throw new Exception('connect fail.');
 		}
 		return $client;
@@ -73,17 +66,12 @@ trait TraitTransporter
 
 
 	/**
-	 * @param $config
-	 * @return Client
-	 * @throws Exception
+	 * @param array $config
+	 * @return string
 	 */
-	private function clientNotCoroutine($config): Client
+	private function alias(array $config): string
 	{
-		$client = new Client(SWOOLE_SOCK_TCP);
-		if (!$client->connect($config['ServiceAddress'], $config['ServicePort'], 60)) {
-			throw new Exception('connect fail.');
-		}
-		return $client;
+		return $config['ServiceAddress'] . '::' . $config['ServicePort'];
 	}
 
 
