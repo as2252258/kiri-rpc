@@ -8,10 +8,12 @@ use Http\Handler\Router;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Psr\Container\NotFoundExceptionInterface;
 use Server\Events\OnBeforeShutdown;
 use Server\Events\OnStart;
 use Server\Contract\OnCloseInterface;
@@ -58,6 +60,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param OnBeforeShutdown $beforeShutdown
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
@@ -70,7 +74,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
+	 * @param OnStart $server
 	 * @throws ConfigException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function register(OnStart $server)
 	{
@@ -187,6 +194,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @param array $handler
 	 * @param $data
 	 * @return array
+	 * @throws \ReflectionException
 	 */
 	private function handler(array $handler, $data): array
 	{
