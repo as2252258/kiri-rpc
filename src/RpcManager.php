@@ -8,6 +8,10 @@ use ReflectionException;
 class RpcManager
 {
 
+
+	/**
+	 * @var array 
+	 */
 	private static array $_rpc = [];
 
 
@@ -34,6 +38,9 @@ class RpcManager
 	}
 
 
+	/**
+	 * @return array
+	 */
 	public static function doneList(): array
 	{
 		$array = [];
