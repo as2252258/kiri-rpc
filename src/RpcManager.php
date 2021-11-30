@@ -10,7 +10,7 @@ class RpcManager
 
 
 	/**
-	 * @var array 
+	 * @var array
 	 */
 	private static array $_rpc = [];
 
