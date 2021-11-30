@@ -2,7 +2,7 @@
 
 namespace Kiri\Rpc;
 
-use Annotation\Inject;
+use Note\Inject;
 use Exception;
 use Http\Message\Response;
 use Http\Message\Stream;

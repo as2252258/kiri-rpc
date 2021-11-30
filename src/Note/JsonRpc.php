@@ -1,8 +1,8 @@
 <?php
 
-namespace Kiri\Rpc\Annotation;
+namespace Kiri\Rpc\Note;
 
-use Annotation\Attribute;
+use Note\Attribute;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Exception\ConfigException;

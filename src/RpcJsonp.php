@@ -2,8 +2,8 @@
 
 namespace Kiri\Rpc;
 
-use Annotation\Annotation;
-use Annotation\Inject;
+use Note\Note;
+use Note\Inject;
 use Http\Constrict\RequestInterface;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
@@ -40,8 +40,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public Router $router;
 
 
-	#[Inject(Annotation::class)]
-	public Annotation $annotation;
+	#[Inject(Note::class)]
+	public Note $annotation;
 
 
 	#[Inject(EventProvider::class)]
