@@ -2,19 +2,19 @@
 
 namespace Kiri\Rpc;
 
-use Note\Note;
-use Note\Inject;
 use Http\Constrict\RequestInterface;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
+use Kiri\Consul\Catalog\Catalog;
 use Kiri\Context;
-use Kiri\Core\Json;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Note\Inject;
+use Note\Note;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -23,7 +23,7 @@ use Server\Contract\OnCloseInterface;
 use Server\Contract\OnConnectInterface;
 use Server\Contract\OnReceiveInterface;
 use Server\Events\OnBeforeShutdown;
-use Server\Events\OnStart;
+use Server\Events\OnWorkerStart;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
@@ -60,6 +60,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'Rpc');
+
+		$this->eventProvider->on(OnWorkerStart::class, [$this, 'register']);
 	}
 
 
@@ -79,14 +81,23 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
-	 * @param OnStart $server
+	 * @param OnWorkerStart $server
 	 * @throws ConfigException
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
 	 */
-	public function register(OnStart $server)
+	public function register(OnWorkerStart $server)
 	{
+		if ($server->workerId != 0) {
+			return;
+		}
+
 		$config = Config::get('rpc');
+
+		$catalog = $this->container->get(Catalog::class);
+		$catalog->register([
+
+		]);
 
 		$agent = $this->container->get(Agent::class);
 		$data = $agent->service->register($config['registry']['config']);

@@ -2,6 +2,7 @@
 
 namespace Kiri\Rpc\Note;
 
+use Kiri\Consul\Catalog\Catalog;
 use Note\Attribute;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
@@ -40,8 +41,8 @@ use ReflectionException;
 	public function execute(mixed $class, mixed $method = ''): bool
 	{
 		$default = $this->create();
-		$agent = Kiri::getDi()->get(Agent::class);
-		$data = $agent->service->register($default);
+		$agent = Kiri::getDi()->get(Catalog::class);
+		$data = $agent->register($default);
 		if ($data->getStatusCode() != 200) {
 			exit($data->getBody()->getContents());
 		}
