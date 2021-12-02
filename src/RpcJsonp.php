@@ -113,6 +113,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function register(OnServerBeforeStart $server)
 	{
+		$this->manager->tableInit();
 		$this->manager->register();
 	}
 

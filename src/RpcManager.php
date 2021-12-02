@@ -2,10 +2,12 @@
 
 namespace Kiri\Rpc;
 
+use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
+use Swoole\Table;
 
 class RpcManager
 {
@@ -15,6 +17,17 @@ class RpcManager
 	 * @var array
 	 */
 	private array $_rpc = [];
+
+
+	private Table $table;
+
+
+	public function tableInit()
+	{
+		$this->table = new Table((int)Config::get('rpc.total', 10));
+		$this->table->column('content', Table::TYPE_STRING);
+		$this->table->create();
+	}
 
 
 	/**
@@ -30,12 +43,10 @@ class RpcManager
 			return;
 		}
 		$body = json_decode($lists->getBody(), true);
-
-		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!empty($body) && is_array($body)) {
-			file_put_contents($file, json_encode(array_column($body, 'Service')));
+			$this->table->set($serviceName, ['content' => json_encode(array_column($body, 'Service'))]);
 		} else {
-			file_put_contents($file, json_encode([]));
+			$this->table->set($serviceName, ['content' => json_encode([])]);
 		}
 	}
 
@@ -59,10 +70,10 @@ class RpcManager
 	public function getServices($serviceName): array
 	{
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
-		if (!file_exists($file)) {
+		if (!$this->table->exist($file)) {
 			return [];
 		}
-		$content = json_decode(file_get_contents($file), true);
+		$content = json_decode($this->table->get($serviceName), true);
 		if (empty($content) || !is_array($content)) {
 			return [];
 		}
