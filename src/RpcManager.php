@@ -45,7 +45,6 @@ class RpcManager
 	 */
 	public function tick(): void
 	{
-		var_dump($this->_rpc);
 		foreach ($this->_rpc as $name => $list) {
 			$this->async($name);
 		}
