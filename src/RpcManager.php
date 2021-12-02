@@ -2,12 +2,10 @@
 
 namespace Kiri\Rpc;
 
-use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
-use Swoole\Table;
 
 class RpcManager
 {
@@ -60,8 +58,8 @@ class RpcManager
 	public function getServices($serviceName): array
 	{
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
-		if (!file_exists($file)) {
-			$this->tick();
+		if (!file_exists($file) || filesize($file) < 10) {
+			$this->async($serviceName);
 		}
 		$content = json_decode(file_get_contents($file), true);
 		if (empty($content) || !is_array($content)) {

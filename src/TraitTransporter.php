@@ -57,7 +57,7 @@ trait TraitTransporter
 			$client = Context::inCoroutine() ? new Coroutine\Client(SWOOLE_SOCK_TCP) : new Client(SWOOLE_SOCK_TCP);
 			$this->clients[$alias] = $client;
 		}
-		[$host, $port] = [$this->config['ServiceAddress'], $this->config['ServicePort']];
+		[$host, $port] = [$this->config['Address'], $this->config['Port']];
 		if (!$client->isConnected() && !$client->connect($host, $port, 60)) {
 			throw new Exception('connect fail.');
 		}
@@ -71,7 +71,7 @@ trait TraitTransporter
 	 */
 	private function alias(array $config): string
 	{
-		return $config['ServiceAddress'] . '::' . $config['ServicePort'];
+		return $config['Address'] . '::' . $config['Port'];
 	}
 
 

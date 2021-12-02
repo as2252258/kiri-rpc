@@ -41,7 +41,7 @@ class ClientPool extends Component
 	 */
 	public function get($config, callable $callback): mixed
 	{
-		$coroutineName = $this->name(self::POOL_NAME . '::' . $config['ServiceAddress'] . '::' . $config['ServicePort'], true);
+		$coroutineName = $this->name(self::POOL_NAME . '::' . $config['Address'] . '::' . $config['Port'], true);
 
 		$pool = $config['pool'] ?? ['min' => 1, 'max' => 100];
 
