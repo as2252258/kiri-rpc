@@ -28,7 +28,9 @@ class RpcManager
 		$methods = Kiri::getDi()->getReflect($class);
 		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
 
-		if (!isset($this->_rpc[$name])) $this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['ID'], 'config' => $serviceConfig];
+		if (!isset($this->_rpc[$name])) {
+			$this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['ID'], 'config' => $serviceConfig];
+		}
 
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
@@ -59,6 +61,7 @@ class RpcManager
 	{
 		$agent = Kiri::getDi()->get(Agent::class);
 		foreach ($this->_rpc as $list) {
+			var_dump($list);
 			$data = $agent->service->register($list['config']);
 			if ($data->getStatusCode() != 200) {
 				exit($data->getBody()->getContents());
