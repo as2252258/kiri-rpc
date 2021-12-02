@@ -28,7 +28,7 @@ class RpcManager
 		$methods = Kiri::getDi()->getReflect($class);
 		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
 
-		if (!isset($this->_rpc[$name])) $this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['id'], 'config' => $serviceConfig];
+		if (!isset($this->_rpc[$name])) $this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['ID'], 'config' => $serviceConfig];
 
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();

@@ -95,16 +95,16 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
-		Timer::tick(1000, static function () {
-			$lists = Kiri::getDi()->get(RpcManager::class)->doneList();
-			$health = Kiri::getDi()->get(Agent::class)->checks;
-			foreach ($lists as $list) {
-
-				$health->checks();
-
-
-			}
-		});
+//		Timer::tick(1000, static function () {
+//			$lists = Kiri::getDi()->get(RpcManager::class)->doneList();
+//			$health = Kiri::getDi()->get(Agent::class)->checks;
+//			foreach ($lists as $list) {
+//
+//				$health->checks();
+//
+//
+//			}
+//		});
 	}
 
 
