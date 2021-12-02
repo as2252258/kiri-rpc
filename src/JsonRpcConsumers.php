@@ -109,7 +109,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	/**
 	 * @param $service
 	 * @return array
-	 * @throws RpcServiceException
+	 * @throws RpcServiceException|\ReflectionException
 	 */
 	private function get_consul($service): array
 	{
