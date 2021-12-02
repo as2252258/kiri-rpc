@@ -61,7 +61,7 @@ class RpcManager
 	{
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!file_exists($file)) {
-			return [];
+			$this->tick();
 		}
 		$content = json_decode(file_get_contents($file), true);
 		if (empty($content) || !is_array($content)) {
