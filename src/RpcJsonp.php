@@ -97,7 +97,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		if ($server->workerId != 0) {
 			return;
 		}
-		Timer::tick(1000, static function () {
+		Timer::tick(1000, static function ($timeId) {
+			if (env('state', 'start') == 'exit') {
+				Timer::clear($timeId);
+				return;
+			}
 			Kiri::getDi()->get(RpcManager::class)->tick();
 		});
 	}
