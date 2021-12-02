@@ -31,12 +31,11 @@ class RpcManager
 		}
 		$body = json_decode($lists->getBody(), true);
 
-		$file = storage('.rpc.clients.' . md5($serviceName),'rpc');
+		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!empty($body) && is_array($body)) {
+			var_dump($body, array_column($body, 'Service'));
 
-			var_dump(array_column($body, 'service'));
-
-			file_put_contents($file, json_encode(array_column($body, 'service')));
+			file_put_contents($file, json_encode(array_column($body, 'Service')));
 		} else {
 			file_put_contents($file, json_encode([]));
 		}
@@ -62,7 +61,7 @@ class RpcManager
 	 */
 	public function getServices($serviceName): array
 	{
-		$file = storage('.rpc.clients.' . md5($serviceName),'rpc');
+		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!file_exists($file)) {
 			return [];
 		}
