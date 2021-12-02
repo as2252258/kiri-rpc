@@ -19,17 +19,6 @@ class RpcManager
 	private array $_rpc = [];
 
 
-	private Table $table;
-
-
-	public function tableInit()
-	{
-		$this->table = new Table((int)Config::get('rpc.total', 10));
-		$this->table->column('name', Table::TYPE_STRING);
-		$this->table->create();
-	}
-
-
 	/**
 	 * @param $serviceName
 	 * @return void
