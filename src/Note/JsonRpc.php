@@ -67,16 +67,14 @@ use ReflectionException;
 			"Meta"              => $this->meta,
 			"Port"              => $rpcPort,
 			"Check"             => [
-				"CheckId"    => "service:rpc.json.{$this->service}." . $this->uniqueId,
-				"Name"       => "service " . $this->service . ' health check',
-				"Notes"      => "Script based health check",
-				"ServiceID"  => $this->service,
-				"Definition" => [
-					"TCP"                            => Network::local() . ":" . Config::get('rpc.port'),
-					"Interval"                       => "5s",
-					"Timeout"                        => "1s",
-					"DeregisterCriticalServiceAfter" => "30s"
-				]
+				"CheckId"                        => "service:rpc.json.{$this->service}." . $this->uniqueId,
+				"Name"                           => "service " . $this->service . ' health check',
+				"Notes"                          => "Script based health check",
+				"ServiceID"                      => $this->service,
+				"TCP"                            => Network::local() . ":" . Config::get('rpc.port'),
+				"Interval"                       => "5s",
+				"Timeout"                        => "1s",
+				"DeregisterCriticalServiceAfter" => "30s"
 			],
 		];
 	}
