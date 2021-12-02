@@ -49,23 +49,20 @@ use ReflectionException;
 	protected function create(): array
 	{
 		$rpcPort = Config::get('rpc.port');
-		return [
+		$defaultConfig = [
 			"ID"                => "rpc.json.{$this->service}." . $this->uniqueId,
 			"Name"              => $this->service,
 			"EnableTagOverride" => false,
 			"TaggedAddresses"   => [
-				"lan" => [
+				"lan_ipv4" => [
 					"address" => "127.0.0.1",
 					"port"    => $rpcPort
 				],
-				"wan" => [
+				"wan_ipv4" => [
 					"address" => Network::local(),
 					"port"    => $rpcPort
 				]
 			],
-			"Meta"              => $this->meta,
-			"Address"           => Network::local(),
-			"Port"              => $rpcPort,
 			"Check"             => [
 				"CheckId"                        => "service:rpc.json.{$this->service}." . $this->uniqueId,
 				"Name"                           => "service " . $this->service . ' health check',
@@ -77,6 +74,13 @@ use ReflectionException;
 				"DeregisterCriticalServiceAfter" => "30s"
 			],
 		];
+		if (!empty($this->meta)) {
+			$defaultConfig["Meta"] = $this->meta;
+		}
+		if (!empty($this->tags)) {
+			$defaultConfig["tags"] = $this->tags;
+		}
+		return $defaultConfig;
 	}
 
 
