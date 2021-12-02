@@ -6,12 +6,9 @@ use Http\Constrict\RequestInterface;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
 use Kiri\Abstracts\Component;
-use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
-use Kiri\Consul\Catalog\Catalog;
 use Kiri\Context;
 use Kiri\Events\EventProvider;
-use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Note\Inject;
 use Note\Note;
@@ -19,14 +16,18 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use ReflectionException;
 use Server\Contract\OnCloseInterface;
 use Server\Contract\OnConnectInterface;
 use Server\Contract\OnReceiveInterface;
 use Server\Events\OnBeforeShutdown;
+use Server\Events\OnServerBeforeStart;
+use Server\Events\OnTaskerStart;
 use Server\Events\OnWorkerStart;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
+use Swoole\Timer;
 
 
 /**
@@ -51,6 +52,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	#[Inject(ContainerInterface::class)]
 	public ContainerInterface $container;
 
+
+
+	private RpcManager $manager;
+
 	/**
 	 *
 	 * @throws \Exception
@@ -61,7 +66,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 		scan_directory(APP_PATH . 'rpc', 'Rpc');
 
-		$this->eventProvider->on(OnWorkerStart::class, [$this, 'register']);
+		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
+		$this->eventProvider->on(OnTaskerStart::class, [$this, 'consulWatches']);
+		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
+
+		$this->manager = Kiri::getDi()->get(RpcManager::class);
 	}
 
 
@@ -72,38 +81,40 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
-		$doneList = RpcManager::doneList();
+		$doneList = $this->manager->doneList();
 		$agent = $this->container->get(Agent::class);
 		foreach ($doneList as $value) {
-			$agent->service->deregister($value);
+			$agent->service->deregister($value['config']['ID']);
+			$agent->checks->deregister($value['config']['Check']['CheckId']);
 		}
 	}
 
 
 	/**
-	 * @param OnWorkerStart $server
-	 * @throws ConfigException
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
+	 * @param OnWorkerStart|OnTaskerStart $server
 	 */
-	public function register(OnWorkerStart $server)
+	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
-		if ($server->workerId != 0) {
-			return;
-		}
+		Timer::tick(1000, static function () {
+			$lists = Kiri::getDi()->get(RpcManager::class)->doneList();
+			$health = Kiri::getDi()->get(Agent::class)->checks;
+			foreach ($lists as $list) {
 
-		$config = Config::get('rpc');
+				$health->checks();
 
-		$catalog = $this->container->get(Catalog::class);
-		$catalog->register([
 
-		]);
+			}
+		});
+	}
 
-		$agent = $this->container->get(Agent::class);
-		$data = $agent->service->register($config['registry']['config']);
-		if ($data->getStatusCode() != 200) {
-			$server->server->shutdown();
-		}
+
+	/**
+	 * @param OnServerBeforeStart $server
+	 * @throws ReflectionException
+	 */
+	public function register(OnServerBeforeStart $server)
+	{
+		$this->manager->register();
 	}
 
 
@@ -193,7 +204,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function dispatch($data): array
 	{
 		try {
-			[$handler, $params, $_] = RpcManager::get($data['service'], $data['method']);
+			[$handler, $params, $_] = $this->container->get(RpcManager::class)->get($data['service'], $data['method']);
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
@@ -223,7 +234,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @param array $handler
 	 * @param $request
 	 * @return array
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	private function handler(array $handler, $request): array
 	{

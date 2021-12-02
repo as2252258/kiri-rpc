@@ -2,32 +2,31 @@
 
 namespace Kiri\Rpc\Note;
 
-use Kiri\Consul\Catalog\Catalog;
-use Note\Attribute;
 use Kiri\Abstracts\Config;
-use Kiri\Consul\Agent;
+use Kiri\Core\Network;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Kiri\Rpc\RpcManager;
+use Note\Attribute;
 use ReflectionException;
 
 #[\Attribute(\Attribute::TARGET_CLASS)] class JsonRpc extends Attribute
 {
 
 
+	private string $uniqueId = '';
+
+
 	/**
 	 * @param string $service
 	 * @param string $driver
+	 * @param array $tags
+	 * @param array $meta
 	 * @param array $checkOptions
 	 */
-	public function __construct(public string $service, public string $driver, public array $checkOptions = [
-		"DeregisterCriticalServiceAfter" => "1m",
-		"Http"                           => "http://127.0.0.1:9527",
-		"Interval"                       => "1s",
-		"Timeout"                        => "1s"
-	])
+	public function __construct(public string $service, public string $driver, public array $tags = [], public array $meta = [], public array $checkOptions = [])
 	{
-
+		$this->uniqueId = preg_replace('/(\w{11})(\w{4})(\w{3})(\w{8})(\w{6})/', '$1-$2-$3-$4-$5', md5(__DIR__ . '.' . md5(Network::local())));
 	}
 
 
@@ -40,13 +39,7 @@ use ReflectionException;
 	 */
 	public function execute(mixed $class, mixed $method = ''): bool
 	{
-		$default = $this->create();
-		$agent = Kiri::getDi()->get(Catalog::class);
-		$data = $agent->register($default);
-		if ($data->getStatusCode() != 200) {
-			exit($data->getBody()->getContents());
-		}
-		return RpcManager::add($this->service, $class, $default['id']);
+		return Kiri::getDi()->get(RpcManager::class)->add($this->service, $class, $this->create());
 	}
 
 
@@ -55,19 +48,36 @@ use ReflectionException;
 	 */
 	protected function create(): array
 	{
-		$content = current(swoole_get_local_ip());
+		$rpcPort = Config::get('rpc.port');
 		return [
-			"id"                => "rpc.json.{$this->service}." . md5(__DIR__ . '.' . md5($content)),
-			"name"              => $this->service,
-			"address"           => $content,
-			"port"              => 9526,
-			"enableTagOverride" => true,
-			"check"             => [
-				"DeregisterCriticalServiceAfter" => "1m",
-				"TCP"                            => $content . ":" . Config::get('rpc.port'),
-				"Interval"                       => "1s",
-				"Timeout"                        => "1s"
-			]
+			"ID"                => "rpc.json.{$this->service}." . $this->uniqueId,
+			"Service"           => $this->service,
+			"Address"           => Network::local(),
+			"EnableTagOverride" => true,
+			"TaggedAddresses"   => [
+				"lan" => [
+					"address" => "127.0.0.1",
+					"port"    => $rpcPort
+				],
+				"wan" => [
+					"address" => Network::local(),
+					"port"    => $rpcPort
+				]
+			],
+			"Meta"              => $this->meta,
+			"Port"              => $rpcPort,
+			"Check"             => [
+				"CheckId"    => "service:rpc.json.{$this->service}." . $this->uniqueId,
+				"Name"       => "service " . $this->service . ' health check',
+				"Notes"      => "Script based health check",
+				"ServiceID"  => $this->service,
+				"Definition" => [
+					"TCP"                            => Network::local() . ":" . Config::get('rpc.port'),
+					"Interval"                       => "5s",
+					"Timeout"                        => "1s",
+					"DeregisterCriticalServiceAfter" => "30s"
+				]
+			],
 		];
 	}
 

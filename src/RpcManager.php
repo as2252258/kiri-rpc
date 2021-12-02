@@ -2,6 +2,7 @@
 
 namespace Kiri\Rpc;
 
+use Kiri\Consul\Agent;
 use Kiri\Kiri;
 use ReflectionException;
 
@@ -12,27 +13,27 @@ class RpcManager
 	/**
 	 * @var array
 	 */
-	private static array $_rpc = [];
+	private array $_rpc = [];
 
 
 	/**
 	 * @param string $name
 	 * @param string $class
-	 * @param string $serviceId
+	 * @param array $serviceConfig
 	 * @return bool
 	 * @throws ReflectionException
 	 */
-	public static function add(string $name, string $class, string $serviceId): bool
+	public function add(string $name, string $class, array $serviceConfig): bool
 	{
 		$methods = Kiri::getDi()->getReflect($class);
 		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
 
-		if (!isset(static::$_rpc[$name])) static::$_rpc[$name] = ['methods' => [], 'id' => $serviceId];
+		if (!isset($this->_rpc[$name])) $this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['id'], 'config' => $serviceConfig];
 
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
 
-			static::$_rpc[$name]['methods'][$methodName] = [[$class, $methodName], null];
+			$this->_rpc[$name]['methods'][$methodName] = [[$class, $methodName], null];
 		}
 		return true;
 	}
@@ -41,13 +42,28 @@ class RpcManager
 	/**
 	 * @return array
 	 */
-	public static function doneList(): array
+	public function doneList(): array
 	{
 		$array = [];
-		foreach (static::$_rpc as $list) {
-			$array[] = $list['id'];
+		foreach ($this->_rpc as $list) {
+			$array[] = $list;
 		}
 		return $array;
+	}
+
+
+	/**
+	 * @throws ReflectionException
+	 */
+	public function register()
+	{
+		$agent = Kiri::getDi()->get(Agent::class);
+		foreach ($this->_rpc as $list) {
+			$data = $agent->service->register($list['config']);
+			if ($data->getStatusCode() != 200) {
+				exit($data->getBody()->getContents());
+			}
+		}
 	}
 
 
@@ -56,9 +72,9 @@ class RpcManager
 	 * @param string $method
 	 * @return mixed
 	 */
-	public static function get(string $name, string $method): array
+	public function get(string $name, string $method): array
 	{
-		return static::$_rpc[$name]['methods'][$method] ?? [null, null];
+		return $this->_rpc[$name]['methods'][$method] ?? [null, null];
 	}
 
 }

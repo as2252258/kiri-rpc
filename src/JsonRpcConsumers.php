@@ -55,6 +55,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	/**
 	 * @param array $data
 	 * @return ServerRequestInterface
+	 * @throws \ReflectionException
 	 */
 	private function requestBody(array $data): ServerRequestInterface
 	{
