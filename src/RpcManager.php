@@ -62,10 +62,9 @@ class RpcManager
 	{
 		$agent = Kiri::getDi()->get(Agent::class);
 		foreach ($this->_rpc as $list) {
-			var_dump(Json::encode($list['config']));
 			$data = $agent->service->register($list['config']);
 			if ($data->getStatusCode() != 200) {
-				var_dump($data->getBody());
+				exit($data->getBody());
 			}
 		}
 	}
