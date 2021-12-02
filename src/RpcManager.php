@@ -2,6 +2,7 @@
 
 namespace Kiri\Rpc;
 
+use Http\Handler\Handler;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Kiri;
@@ -88,7 +89,7 @@ class RpcManager
 		foreach ($lists as $reflection) {
 			$methodName = $reflection->getName();
 
-			$this->_rpc[$name]['methods'][$methodName] = [[$class, $methodName], null];
+			$this->_rpc[$name]['methods'][$methodName] = [new Handler('/', [$class, $methodName]), null];
 		}
 		return true;
 	}

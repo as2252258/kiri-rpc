@@ -3,6 +3,7 @@
 namespace Kiri\Rpc;
 
 use Http\Constrict\RequestInterface;
+use Http\Handler\Handler;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
 use Kiri\Abstracts\Component;
@@ -207,9 +208,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
-				$PsrRequest = Context::setContext(RequestInterface::class, $this->createServerRequest($params));
+				Context::setContext(RequestInterface::class, $this->createServerRequest($params));
 
-				return $this->handler($handler, $PsrRequest);
+				return $this->handler($handler);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -230,18 +231,14 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
-	 * @param array $handler
-	 * @param $request
+	 * @param Handler $handler
 	 * @return array
-	 * @throws ReflectionException
 	 */
-	private function handler(array $handler, $request): array
+	private function handler(Handler $handler): array
 	{
-		$controller = Kiri::getDi()->get($handler[0]);
-		$dispatcher = $controller->{$handler[1]}($request);
 		return [
 			'jsonrpc' => '2.0',
-			'result'  => $dispatcher,
+			'result'  => call_user_func($handler->callback, ...$handler->params),
 			'id'      => $data['id'] ?? null
 		];
 	}
