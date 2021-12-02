@@ -17,26 +17,26 @@ class RpcManager
 	private array $_rpc = [];
 
 
-	private array $_services = [];
-
-
 	/**
 	 * @param $serviceName
-	 * @return array
+	 * @return void
 	 * @throws ReflectionException
+	 * @throws \Exception
 	 */
-	public function async($serviceName): array
+	public function async($serviceName): void
 	{
 		$lists = Kiri::getDi()->get(Health::class)->setQuery('passing=true')->service($serviceName);
 		if ($lists->getStatusCode() != 200) {
-			return [];
+			return;
 		}
-		var_dump($lists->getBody());
 		$body = json_decode($lists->getBody(), true);
-		if (empty($body) || !is_array($body)) {
-			return $this->_services = [];
+
+		$file = storage('.rpc.clients.' . md5($serviceName),'rpc');
+		if (!empty($body) && is_array($body)) {
+			file_put_contents($file, json_encode(array_column($body, 'service')));
+		} else {
+			file_put_contents($file, json_encode([]));
 		}
-		return $this->_services[$serviceName] = array_column($body, 'service');
 	}
 
 
@@ -54,10 +54,19 @@ class RpcManager
 	/**
 	 * @param $serviceName
 	 * @return array
+	 * @throws \Exception
 	 */
 	public function getServices($serviceName): array
 	{
-		return $this->_services[$serviceName] ?? [];
+		$file = storage('.rpc.clients.' . md5($serviceName),'rpc');
+		if (!file_exists($file)) {
+			return [];
+		}
+		$content = json_decode(file_get_contents($file), true);
+		if (empty($content) || !is_array($content)) {
+			return [];
+		}
+		return $content;
 	}
 
 
