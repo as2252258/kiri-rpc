@@ -33,8 +33,6 @@ class RpcManager
 
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!empty($body) && is_array($body)) {
-			var_dump($body, array_column($body, 'Service'));
-
 			file_put_contents($file, json_encode(array_column($body, 'Service')));
 		} else {
 			file_put_contents($file, json_encode([]));
