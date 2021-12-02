@@ -25,7 +25,7 @@ class RpcManager
 	public function tableInit()
 	{
 		$this->table = new Table((int)Config::get('rpc.total', 10));
-		$this->table->column('content', Table::TYPE_STRING);
+		$this->table->column('name', Table::TYPE_STRING);
 		$this->table->create();
 	}
 
@@ -43,10 +43,11 @@ class RpcManager
 			return;
 		}
 		$body = json_decode($lists->getBody(), true);
+		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!empty($body) && is_array($body)) {
-			$this->table->set($serviceName, ['content' => json_encode(array_column($body, 'Service'))]);
+			file_put_contents($file, json_encode(array_column($body, 'Service')), LOCK_EX);
 		} else {
-			$this->table->set($serviceName, ['content' => json_encode([])]);
+			file_put_contents($file, json_encode([]), LOCK_EX);
 		}
 	}
 
@@ -70,10 +71,10 @@ class RpcManager
 	public function getServices($serviceName): array
 	{
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
-		if (!$this->table->exist($file)) {
+		if (!file_exists($file)) {
 			return [];
 		}
-		$content = json_decode($this->table->get($serviceName), true);
+		$content = json_decode(file_get_contents($file), true);
 		if (empty($content) || !is_array($content)) {
 			return [];
 		}
