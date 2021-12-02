@@ -6,7 +6,6 @@ namespace Kiri\Rpc;
 use Exception;
 use Http\Message\ServerRequest;
 use Http\Message\Stream;
-use Kiri\Consul\Agent;
 use Kiri\Core\Number;
 use Kiri\Kiri;
 use Kiri\Pool\Pool;
@@ -110,32 +109,41 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	/**
 	 * @param $service
 	 * @return array
-	 * @throws Exception
+	 * @throws RpcServiceException
 	 */
 	private function get_consul($service): array
 	{
 		if (empty($service)) {
-			throw new Exception('You need set rpc service name if used.');
+			throw new RpcServiceException('You need set rpc service name if used.');
 		}
-		$sf = Kiri::getDi()->get(Agent::class);
+		$sf = Kiri::getDi()->get(RpcManager::class)->getServices($service);
+		if (empty($sf) || !is_array($sf)) {
+			throw new RpcServiceException('You need set rpc service name if used.');
+		}
+		return $this->_loadRand($sf);
+	}
 
-		$response = $sf->service->setQuery('filter=Service == ' . $service)->list();
-		if ($response->getStatusCode() != 200 || $response->getBody()->getSize() <= 2) {
-			throw new Exception('No microservices found [' . $service . '].');
-		}
+
+	/**
+	 * @param $services
+	 * @return array
+	 */
+	private function _loadRand($services): array
+	{
 		$array = [];
-
-		$content = json_decode($response->getBody()->getContents(), true);
-		foreach ($content as $value) {
-			$array[] = ['id' => $value['ID'], 'Weights' => $value['Weights']['Passing']];
+		foreach ($services as $value) {
+			$value['Weight'] = $value['Weights']['Passing'];
+			$array[] = $value;
 		}
-
 		if (count($array) < 2) {
 			$luck = $array[0];
 		} else {
-			$luck = Luckdraw::luck($array, 'Weights');
+			$luck = Luckdraw::luck($array, 'Weight');
 		}
-		return ['Address' => $luck['Address'], 'Port' => $luck['Port']];
+		return [
+			'Address' => $luck['TaggedAddresses']['wan_ipv4']['Address'],
+			'Port'    => $luck['TaggedAddresses']['wan_ipv4']['Port']
+		];
 	}
 
 }

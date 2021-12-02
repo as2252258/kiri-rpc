@@ -3,7 +3,7 @@
 namespace Kiri\Rpc;
 
 use Kiri\Consul\Agent;
-use Kiri\Core\Json;
+use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
 
@@ -15,6 +15,50 @@ class RpcManager
 	 * @var array
 	 */
 	private array $_rpc = [];
+
+
+	private array $_services = [];
+
+
+	/**
+	 * @param $serviceName
+	 * @return array
+	 * @throws ReflectionException
+	 */
+	public function async($serviceName): array
+	{
+		$lists = Kiri::getDi()->get(Health::class)->setQuery('passing=true')->service($serviceName);
+		if ($lists->getStatusCode() != 200) {
+			return [];
+		}
+		var_dump($lists->getBody());
+		$body = json_decode($lists->getBody(), true);
+		if (empty($body) || !is_array($body)) {
+			return $this->_services = [];
+		}
+		return $this->_services[$serviceName] = array_column($body, 'service');
+	}
+
+
+	/**
+	 * @throws ReflectionException
+	 */
+	public function tick(): void
+	{
+		foreach ($this->_rpc as $name => $list) {
+			$this->async($name);
+		}
+	}
+
+
+	/**
+	 * @param $serviceName
+	 * @return array
+	 */
+	public function getServices($serviceName): array
+	{
+		return $this->_services[$serviceName] ?? [];
+	}
 
 
 	/**
