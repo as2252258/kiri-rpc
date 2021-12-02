@@ -52,8 +52,7 @@ use ReflectionException;
 		return [
 			"ID"                => "rpc.json.{$this->service}." . $this->uniqueId,
 			"Name"              => $this->service,
-			"Address"           => Network::local(),
-			"EnableTagOverride" => true,
+			"EnableTagOverride" => false,
 			"TaggedAddresses"   => [
 				"lan" => [
 					"address" => "127.0.0.1",
@@ -65,6 +64,7 @@ use ReflectionException;
 				]
 			],
 			"Meta"              => $this->meta,
+			"Address"           => Network::local(),
 			"Port"              => $rpcPort,
 			"Check"             => [
 				"CheckId"                        => "service:rpc.json.{$this->service}." . $this->uniqueId,
