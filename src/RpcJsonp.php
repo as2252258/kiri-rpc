@@ -94,6 +94,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
+		if ($server->workerId != 0) {
+			return;
+		}
 		Timer::tick(1000, static function () {
 			Kiri::getDi()->get(RpcManager::class)->tick();
 		});
