@@ -203,7 +203,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function dispatch($data): array
 	{
 		try {
-			[$handler, $params, $_] = $this->container->get(RpcManager::class)->get($data['service'], $data['method']);
+			[$handler, $params] = $this->container->get(RpcManager::class)->get($data['service'], $data['method']);
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
