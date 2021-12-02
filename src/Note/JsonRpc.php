@@ -51,7 +51,7 @@ use ReflectionException;
 		$rpcPort = Config::get('rpc.port');
 		return [
 			"ID"                => "rpc.json.{$this->service}." . $this->uniqueId,
-			"Service"           => $this->service,
+			"Name"              => $this->service,
 			"Address"           => Network::local(),
 			"EnableTagOverride" => true,
 			"TaggedAddresses"   => [
