@@ -9,7 +9,7 @@ use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
 
-class RpcManager extends BaseObject
+class RpcManager
 {
 
 
