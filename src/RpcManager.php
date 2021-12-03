@@ -3,13 +3,13 @@
 namespace Kiri\Rpc;
 
 use Http\Handler\Handler;
-use Kiri\Abstracts\BaseObject;
+use Kiri\Abstracts\Component;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
 
-class RpcManager extends BaseObject
+class RpcManager extends Component
 {
 
 
