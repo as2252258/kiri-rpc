@@ -50,10 +50,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public EventProvider $eventProvider;
 
 
-	#[Inject(ContainerInterface::class)]
-	public ContainerInterface $container;
-
-
 	private RpcManager $manager;
 
 	/**
