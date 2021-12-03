@@ -9,7 +9,7 @@ use Kiri\Consul\Health;
 use Kiri\Kiri;
 use ReflectionException;
 
-class RpcManager
+class RpcManager extends BaseObject
 {
 
 
@@ -88,8 +88,10 @@ class RpcManager
 		}
 
 		foreach ($lists as $reflection) {
+			if ($reflection->getDeclaringClass() != $class) {
+				continue;
+			}
 			$methodName = $reflection->getName();
-
 			$this->_rpc[$name]['methods'][$methodName] = [new Handler('/', [$class, $methodName]), null];
 		}
 		return true;
