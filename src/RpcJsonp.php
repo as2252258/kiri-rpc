@@ -63,7 +63,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		scan_directory(APP_PATH . 'rpc', 'Rpc');
 
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
-		$this->eventProvider->on(OnTaskerStart::class, [$this, 'consulWatches']);
 		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
 
 		$this->manager = Kiri::getDi()->get(RpcManager::class);
