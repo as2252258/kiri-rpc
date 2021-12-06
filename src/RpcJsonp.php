@@ -7,14 +7,15 @@ use Http\Handler\Handler;
 use Http\Handler\Router;
 use Http\Message\ServerRequest;
 use Kiri\Abstracts\Component;
+use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
 use Kiri\Context;
 use Kiri\Events\EventProvider;
+use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Note\Inject;
 use Note\Note;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
@@ -87,13 +88,15 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param OnWorkerStart|OnTaskerStart $server
+	 * @throws ConfigException
 	 */
 	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
 		if ($server->workerId != 0) {
 			return;
 		}
-		Timer::tick(1000, static function ($timeId) {
+		$async_time = (int)Config::get('consul.async_time', 1000);
+		Timer::tick($async_time, static function ($timeId) {
 			if (env('state', 'start') == 'exit') {
 				Timer::clear($timeId);
 				return;
