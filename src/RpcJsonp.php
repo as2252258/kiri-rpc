@@ -47,9 +47,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public Note $annotation;
 
 
-	#[Inject(EventProvider::class)]
-	public EventProvider $eventProvider;
-
 
 	private RpcManager $manager;
 
@@ -72,8 +69,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param OnBeforeShutdown $beforeShutdown
+	 * @return void
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
+	 * @throws ReflectionException
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
