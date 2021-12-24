@@ -28,6 +28,7 @@ class RpcManager extends Component
 	public function async($serviceName): void
 	{
 		$lists = Kiri::getDi()->get(Health::class)->setQuery('passing=true')->service($serviceName);
+		var_dump($lists);
 		if ($lists->getStatusCode() != 200) {
 			return;
 		}
