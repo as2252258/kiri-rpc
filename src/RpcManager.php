@@ -120,7 +120,7 @@ class RpcManager extends Component
 		foreach ($this->_rpc as $list) {
 			$data = $agent->service->register($list['config']);
 			if ($data->getStatusCode() != 200) {
-				exit($data->getBody());
+				return;
 			}
 		}
 	}
