@@ -72,7 +72,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @return void
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
-	 * @throws ReflectionException
 	 */
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
@@ -107,7 +106,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param OnServerBeforeStart $server
-	 * @throws ReflectionException
 	 */
 	public function register(OnServerBeforeStart $server)
 	{
