@@ -112,7 +112,6 @@ class RpcManager extends Component
 
 
 	/**
-	 * @throws ReflectionException
 	 */
 	public function register()
 	{
