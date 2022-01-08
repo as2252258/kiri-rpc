@@ -61,7 +61,7 @@ return [
 				"node"       => "t2.320",
 				"checkId"    => "service:redis1",
 				"name"       => "Redis health check",
-				"notes"      => "Script based health check",
+				"Annotations"      => "Script based health check",
 				"status"     => "passing",
 				"serviceID"  => "redis1",
 				"definition" => [

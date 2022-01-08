@@ -16,7 +16,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Kiri\\Rpc\\": "src/"
+      "Kiri\\Rpc\\": "./"
     }
   },
   "require-dev": {

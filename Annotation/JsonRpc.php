@@ -1,13 +1,13 @@
 <?php
 
-namespace Kiri\Rpc\Note;
+namespace Kiri\Rpc\Annotation;
 
 use Kiri\Abstracts\Config;
 use Kiri\Core\Network;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Kiri\Rpc\RpcManager;
-use Note\Attribute;
+use Kiri\Annotation\Attribute;
 use ReflectionException;
 
 #[\Attribute(\Attribute::TARGET_CLASS)] class JsonRpc extends Attribute
@@ -23,10 +23,11 @@ use ReflectionException;
 	 * @param array $tags
 	 * @param array $meta
 	 * @param array $checkOptions
+	 * @param string $checkUrl
 	 */
-	public function __construct(public string $service, public string $driver, public array $tags = [], public array $meta = [], public array $checkOptions = [])
+	public function __construct(public string $service, public string $driver, public array $tags = [], public array $meta = [], public array $checkOptions = [], public string $checkUrl = '')
 	{
-		$this->uniqueId = preg_replace('/(\w{11})(\w{4})(\w{3})(\w{8})(\w{6})/', '$1-$2-$3-$4-$5', md5(__DIR__ . '.' . md5(Network::local())));
+		$this->uniqueId = preg_replace('/(\w{11})(\w{4})(\w{3})(\w{8})(\w{6})/', '$1-$2-$3-$4-$5', md5(__DIR__ . 'Annotation' . md5(Network::local())));
 	}
 
 
@@ -49,6 +50,9 @@ use ReflectionException;
 	protected function create(): array
 	{
 		$rpcPort = Config::get('rpc.port');
+		if (empty($this->checkUrl)) {
+			$this->checkUrl = Network::local() . ":" . Config::get('rpc.port');
+		}
 		$defaultConfig = [
 			"ID"                => "rpc.json.{$this->service}." . $this->uniqueId,
 			"Name"              => $this->service,
@@ -66,9 +70,9 @@ use ReflectionException;
 			"Check"             => [
 				"CheckId"                        => "service:rpc.json.{$this->service}." . $this->uniqueId,
 				"Name"                           => "service " . $this->service . ' health check',
-				"Notes"                          => "Script based health check",
+				"Annotations"                          => "Script based health check",
 				"ServiceID"                      => $this->service,
-				"TCP"                            => Network::local() . ":" . Config::get('rpc.port'),
+				"TCP"                            => $this->checkUrl,
 				"Interval"                       => "5s",
 				"Timeout"                        => "1s",
 				"DeregisterCriticalServiceAfter" => "30s"

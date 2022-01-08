@@ -13,8 +13,8 @@ use Kiri\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
-use Note\Inject;
-use Note\Note;
+use Kiri\Annotation\Inject;
+use Kiri\Annotation\Annotation;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -43,8 +43,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public Router $router;
 
 
-	#[Inject(Note::class)]
-	public Note $annotation;
+	#[Inject(Annotation::class)]
+	public Annotation $annotation;
 
 
 
