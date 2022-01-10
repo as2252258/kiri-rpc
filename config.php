@@ -3,7 +3,7 @@
 
 use Kiri\Rpc\RpcJsonp;
 use Kiri\Rpc\TestRpcService;
-use Server\Constant;
+use Kiri\Server\Constant;
 
 return [
 	'rpc' => [

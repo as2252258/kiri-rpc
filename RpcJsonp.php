@@ -2,10 +2,10 @@
 
 namespace Kiri\Rpc;
 
-use Http\Constrict\RequestInterface;
-use Http\Handler\Handler;
-use Http\Handler\Router;
-use Http\Message\ServerRequest;
+use Kiri\Message\Constrict\RequestInterface;
+use Kiri\Message\Handler\Handler;
+use Kiri\Message\Handler\Router;
+use Kiri\Message\ServerRequest;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Consul\Agent;
@@ -19,13 +19,13 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
-use Server\Contract\OnCloseInterface;
-use Server\Contract\OnConnectInterface;
-use Server\Contract\OnReceiveInterface;
-use Server\Events\OnBeforeShutdown;
-use Server\Events\OnServerBeforeStart;
-use Server\Events\OnTaskerStart;
-use Server\Events\OnWorkerStart;
+use Kiri\Server\Contract\OnCloseInterface;
+use Kiri\Server\Contract\OnConnectInterface;
+use Kiri\Server\Contract\OnReceiveInterface;
+use Kiri\Server\Events\OnBeforeShutdown;
+use Kiri\Server\Events\OnServerBeforeStart;
+use Kiri\Server\Events\OnTaskerStart;
+use Kiri\Server\Events\OnWorkerStart;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;

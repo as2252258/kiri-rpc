@@ -4,8 +4,8 @@ namespace Kiri\Rpc;
 
 
 use Exception;
-use Http\Message\ServerRequest;
-use Http\Message\Stream;
+use Kiri\Message\ServerRequest;
+use Kiri\Message\Stream;
 use Kiri\Core\Number;
 use Kiri\Kiri;
 use Kiri\Pool\Pool;

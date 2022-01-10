@@ -4,8 +4,8 @@ namespace Kiri\Rpc;
 
 use Kiri\Annotation\Inject;
 use Exception;
-use Http\Message\Response;
-use Http\Message\Stream;
+use Kiri\Message\Response;
+use Kiri\Message\Stream;
 use Kiri\Abstracts\Config;
 use Kiri\Exception\ConfigException;
 use Psr\Http\Client\ClientInterface;

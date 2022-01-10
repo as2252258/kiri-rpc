@@ -2,7 +2,7 @@
 
 namespace Kiri\Rpc;
 
-use Http\Handler\Handler;
+use Kiri\Message\Handler\Handler;
 use Kiri\Abstracts\Component;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;

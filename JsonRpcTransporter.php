@@ -2,8 +2,8 @@
 
 namespace Kiri\Rpc;
 
-use Http\Message\Response;
-use Http\Message\Stream;
+use Kiri\Message\Response;
+use Kiri\Message\Stream;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
