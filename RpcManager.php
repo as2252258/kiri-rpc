@@ -118,6 +118,8 @@ class RpcManager extends Component
 		try {
 			$agent = Kiri::getDi()->get(Agent::class);
 			foreach ($this->_rpc as $list) {
+				$agent->service->deregister($list['config']['ID']);
+				$agent->checks->deregister($list['config']['Check']['CheckId']);
 				$data = $agent->service->register($list['config']);
 				if ($data->getStatusCode() != 200) {
 					return;
