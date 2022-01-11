@@ -31,6 +31,7 @@ class RpcManager extends Component
 		if ($lists->getStatusCode() != 200) {
 			return;
 		}
+		var_dump($lists->getBody());
 		$body = json_decode($lists->getBody(), true);
 		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
 		if (!empty($body) && is_array($body)) {
