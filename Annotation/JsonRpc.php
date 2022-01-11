@@ -70,7 +70,7 @@ use ReflectionException;
 			"Check"             => [
 				"CheckId"                        => "service:rpc.json.{$this->service}." . $this->uniqueId,
 				"Name"                           => "service " . $this->service . ' health check',
-				"Annotations"                          => "Script based health check",
+				"Notes"                          => "Script based health check",
 				"ServiceID"                      => $this->service,
 				"TCP"                            => $this->checkUrl,
 				"Interval"                       => "5s",
