@@ -2,11 +2,11 @@
 
 namespace Kiri\Rpc;
 
-use Kiri\Message\Handler\Handler;
 use Kiri\Abstracts\Component;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Kiri;
+use Kiri\Message\Handler\Handler;
 use ReflectionException;
 
 class RpcManager extends Component
@@ -115,12 +115,16 @@ class RpcManager extends Component
 	 */
 	public function register()
 	{
-		$agent = Kiri::getDi()->get(Agent::class);
-		foreach ($this->_rpc as $list) {
-			$data = $agent->service->register($list['config']);
-			if ($data->getStatusCode() != 200) {
-				return;
+		try {
+			$agent = Kiri::getDi()->get(Agent::class);
+			foreach ($this->_rpc as $list) {
+				$data = $agent->service->register($list['config']);
+				if ($data->getStatusCode() != 200) {
+					return;
+				}
 			}
+		} catch (\Throwable $exception) {
+			var_dump($exception);
 		}
 	}
 
