@@ -6,7 +6,7 @@ use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Context;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Pool\Alias;
 use Kiri\Pool\Pool;
 use Swoole\Client;

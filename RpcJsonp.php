@@ -12,7 +12,7 @@ use Kiri\Consul\Agent;
 use Kiri\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Annotation\Inject;
 use Kiri\Annotation\Annotation;
 use Psr\Container\ContainerExceptionInterface;

@@ -7,7 +7,7 @@ use Exception;
 use Kiri\Message\ServerRequest;
 use Kiri\Message\Stream;
 use Kiri\Core\Number;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Pool\Pool;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;

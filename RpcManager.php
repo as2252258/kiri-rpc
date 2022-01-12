@@ -5,7 +5,7 @@ namespace Kiri\Rpc;
 use Kiri\Abstracts\Component;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Message\Handler\Handler;
 use ReflectionException;
 

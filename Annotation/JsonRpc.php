@@ -5,7 +5,7 @@ namespace Kiri\Rpc\Annotation;
 use Kiri\Abstracts\Config;
 use Kiri\Core\Network;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Rpc\RpcManager;
 use Kiri\Annotation\Attribute;
 use ReflectionException;
