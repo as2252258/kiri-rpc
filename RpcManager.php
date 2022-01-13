@@ -143,6 +143,8 @@ class RpcManager extends Component
 	public function register()
 	{
 		$agent = Kiri::getDi()->get(Agent::class);
+
+		var_dump($agent);
 		foreach ($this->_rpc as $list) {
 			$agent->service->deregister($list['config']['ID']);
 			$data = $agent->service->register($list['config']);
