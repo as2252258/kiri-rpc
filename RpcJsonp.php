@@ -94,8 +94,12 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			return;
 		}
 		$async_time = (int)Config::get('consul.async_time', 1000);
+		var_dump($async_time);
 		Timer::tick($async_time, static function ($timeId) {
 			if (env('state', 'start') == 'exit') {
+
+				var_dump('clear');
+
 				Timer::clear($timeId);
 				return;
 			}
