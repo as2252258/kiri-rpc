@@ -149,7 +149,6 @@ class RpcManager extends Component
 		foreach ($this->_rpc as $list) {
 			$agent->service->deregister($list['config']['ID']);
 			$data = $agent->service->register($list['config']);
-			var_dump($data);
 			if ($data->getStatusCode() != 200) {
 				return;
 			}
