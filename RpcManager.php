@@ -2,10 +2,11 @@
 
 namespace Kiri\Rpc;
 
+use Exception;
+use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
-use Kiri;
 use Kiri\Message\Handler\Handler;
 use ReflectionException;
 
@@ -22,11 +23,12 @@ class RpcManager extends Component
 	/**
 	 * @param $serviceName
 	 * @return void
-	 * @throws ReflectionException
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function async($serviceName): void
 	{
+		$this->reRegister($serviceName);
+
 		$lists = Kiri::getDi()->get(Health::class)->setQuery('passing=true')->service($serviceName);
 		if ($lists->getStatusCode() != 200) {
 			return;
@@ -42,7 +44,32 @@ class RpcManager extends Component
 
 
 	/**
+	 * @param string $serviceName
+	 * @return void
+	 * @throws Kiri\Exception\ConfigException
+	 * @throws Exception
+	 */
+	public function reRegister(string $serviceName)
+	{
+		$config = $this->_rpc[$serviceName] ?? [];
+		if (empty($config)) {
+			return;
+		}
+		$service = Kiri::getDi()->get(Agent::class);
+
+		$info = $service->service->service_health($config['config']['ID']);
+		if ($info->getStatusCode() == 200) {
+			return;
+		}
+		$data = $service->service->register($config['config']);
+
+		$this->logger()->info($data);
+	}
+
+
+	/**
 	 * @throws ReflectionException
+	 * @throws Exception
 	 */
 	public function tick(): void
 	{
@@ -55,7 +82,7 @@ class RpcManager extends Component
 	/**
 	 * @param $serviceName
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function getServices($serviceName): array
 	{
