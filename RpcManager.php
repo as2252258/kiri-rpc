@@ -63,7 +63,7 @@ class RpcManager extends Component
 		}
 		$data = $service->service->register($config['config']);
 
-		$this->logger()->info($data);
+		$this->logger()->info($data->getBody());
 	}
 
 
