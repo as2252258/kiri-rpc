@@ -90,6 +90,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
+		var_dump($server->workerId);
 		if ($server->workerId != 0) {
 			return;
 		}
