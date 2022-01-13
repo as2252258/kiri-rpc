@@ -58,7 +58,6 @@ class RpcManager extends Component
 		$service = Kiri::getDi()->get(Agent::class);
 
 		$info = $service->service->service_health($config['config']['ID']);
-		var_dump($info->getBody());
 		if ($info->getStatusCode() == 200) {
 			return;
 		}
