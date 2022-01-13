@@ -58,7 +58,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	{
 		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
-		scan_directory(APP_PATH . 'rpc', 'Rpc');
+		scan_directory(APP_PATH . 'rpc', 'app\Rpc');
 
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
 		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
