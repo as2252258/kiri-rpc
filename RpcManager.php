@@ -68,13 +68,16 @@ class RpcManager extends Component
 
 
 	/**
-	 * @throws ReflectionException
 	 * @throws Exception
 	 */
 	public function tick(): void
 	{
-		foreach ($this->_rpc as $name => $list) {
-			$this->async($name);
+		try {
+			foreach ($this->_rpc as $name => $list) {
+				$this->async($name);
+			}
+		} catch (\Throwable $throwable) {
+			$this->logger()->error(error_trigger_format($throwable));
 		}
 	}
 
