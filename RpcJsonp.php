@@ -90,11 +90,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function consulWatches(OnWorkerStart|OnTaskerStart $server)
 	{
-		var_dump($server->workerId);
 		if ($server->workerId != 0) {
 			return;
 		}
 		$async_time = (int)Config::get('consul.async_time', 1000);
+		var_dump($async_time);
 		Timer::tick($async_time, static function ($timeId) {
 			if (env('state', 'start') == 'exit') {
 				Timer::clear($timeId);
