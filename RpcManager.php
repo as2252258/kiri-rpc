@@ -46,7 +46,6 @@ class RpcManager extends Component
 	/**
 	 * @param string $serviceName
 	 * @return void
-	 * @throws Kiri\Exception\ConfigException
 	 * @throws Exception
 	 */
 	public function reRegister(string $serviceName)
@@ -61,9 +60,7 @@ class RpcManager extends Component
 		if ($info->getStatusCode() == 200) {
 			return;
 		}
-		$data = $service->service->register($config['config']);
-
-		$this->logger()->info($data->getBody());
+		$service->service->register($config['config']);
 	}
 
 
