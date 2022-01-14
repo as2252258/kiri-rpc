@@ -2,30 +2,29 @@
 
 namespace Kiri\Rpc;
 
+use Kiri;
+use Kiri\Abstracts\Component;
+use Kiri\Abstracts\Config;
+use Kiri\Annotation\Annotation;
+use Kiri\Annotation\Inject;
+use Kiri\Consul\Agent;
+use Kiri\Context;
+use Kiri\Exception\ConfigException;
 use Kiri\Message\Constrict\RequestInterface;
 use Kiri\Message\Handler\Handler;
 use Kiri\Message\Handler\Router;
 use Kiri\Message\ServerRequest;
-use Kiri\Abstracts\Component;
-use Kiri\Abstracts\Config;
-use Kiri\Consul\Agent;
-use Kiri\Context;
-use Kiri\Events\EventProvider;
-use Kiri\Exception\ConfigException;
-use Kiri;
-use Kiri\Annotation\Inject;
-use Kiri\Annotation\Annotation;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use ReflectionException;
 use Kiri\Server\Contract\OnCloseInterface;
 use Kiri\Server\Contract\OnConnectInterface;
 use Kiri\Server\Contract\OnReceiveInterface;
 use Kiri\Server\Events\OnBeforeShutdown;
 use Kiri\Server\Events\OnServerBeforeStart;
 use Kiri\Server\Events\OnTaskerStart;
+use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStart;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
@@ -47,8 +46,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public Annotation $annotation;
 
 
-
 	private RpcManager $manager;
+
+
+	private int $timerId;
 
 	/**
 	 *
@@ -61,6 +62,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		scan_directory(APP_PATH . 'rpc', 'app\Rpc');
 
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
+		$this->eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
 
 		$this->manager = Kiri::getDi()->get(RpcManager::class);
@@ -94,13 +96,19 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			return;
 		}
 		$async_time = (int)Config::get('consul.async_time', 1000);
-		Timer::tick($async_time, static function ($timeId) {
-			if (env('state', 'start') == 'exit') {
-				Timer::clear($timeId);
-				return;
-			}
+		$this->timerId = Timer::tick($async_time, static function () {
 			Kiri::getDi()->get(RpcManager::class)->tick();
 		});
+	}
+
+
+	/**
+	 * @param OnWorkerExit $exit
+	 * @return void
+	 */
+	public function onWorkerExit(OnWorkerExit $exit)
+	{
+		Timer::clear($this->timerId);
 	}
 
 
