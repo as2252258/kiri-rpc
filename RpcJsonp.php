@@ -57,13 +57,13 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function init(): void
 	{
-		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
+		$this->getEventProvider()->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'app\Rpc');
 
-		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
-		$this->eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
-		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
+		$this->getEventProvider()->on(OnWorkerStart::class, [$this, 'consulWatches']);
+		$this->getEventProvider()->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
+		$this->getEventProvider()->on(OnServerBeforeStart::class, [$this, 'register']);
 
 		$this->manager = Kiri::getDi()->get(RpcManager::class);
 	}
@@ -78,7 +78,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
 		$doneList = $this->manager->doneList();
-		$agent = $this->container->get(Agent::class);
+		$agent = $this->getContainer()->get(Agent::class);
 		foreach ($doneList as $value) {
 			$agent->service->deregister($value['config']['ID']);
 			$agent->checks->deregister($value['config']['Check']['CheckId']);
@@ -207,7 +207,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function dispatch($data): array
 	{
 		try {
-			[$handler, $params] = $this->container->get(RpcManager::class)->get($data['service'], $data['method']);
+			[$handler, $params] = $this->getContainer()->get(RpcManager::class)->get($data['service'], $data['method']);
 			if (is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
