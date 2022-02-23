@@ -7,10 +7,10 @@ use Kiri\Core\Network;
 use Kiri\Exception\ConfigException;
 use Kiri;
 use Kiri\Rpc\RpcManager;
-use Kiri\Annotation\Attribute;
+use Kiri\Annotation\AbstractAttribute;
 use ReflectionException;
 
-#[\Attribute(\Attribute::TARGET_CLASS)] class JsonRpc extends Attribute
+#[\Attribute(\Attribute::TARGET_CLASS)] class JsonRpc extends AbstractAttribute
 {
 
 

@@ -74,7 +74,7 @@ class RpcManager extends Component
 				$this->async($name);
 			}
 		} catch (\Throwable $throwable) {
-			$this->logger()->error(error_trigger_format($throwable));
+			$this->logger->error(error_trigger_format($throwable));
 		}
 	}
 

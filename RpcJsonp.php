@@ -25,6 +25,7 @@ use Kiri\Server\Events\OnWorkerStart;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use ReflectionException;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
@@ -51,19 +52,23 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	private int $timerId;
 
+
 	/**
-	 *
-	 * @throws \Exception
+	 * @return void
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws ReflectionException
 	 */
 	public function init(): void
 	{
-		$this->getEventProvider()->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
+		$provider = $this->getEventProvider();
+		$provider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'app\Rpc');
 
-		$this->getEventProvider()->on(OnWorkerStart::class, [$this, 'consulWatches']);
-		$this->getEventProvider()->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
-		$this->getEventProvider()->on(OnServerBeforeStart::class, [$this, 'register']);
+		$provider->on(OnWorkerStart::class, [$this, 'consulWatches']);
+		$provider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
+		$provider->on(OnServerBeforeStart::class, [$this, 'register']);
 
 		$this->manager = Kiri::getDi()->get(RpcManager::class);
 	}
