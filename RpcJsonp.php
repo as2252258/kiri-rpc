@@ -277,9 +277,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
+	 * @param \Swoole\WebSocket\Server $server
 	 * @param int $fd
+	 * @return void
 	 */
-	public function onClose(int $fd): void
+	public function onClose(\Swoole\WebSocket\Server $server, int $fd): void
 	{
 		// TODO: Implement onClose() method.
 	}
