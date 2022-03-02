@@ -2,12 +2,13 @@
 
 namespace Kiri\Rpc\Annotation;
 
+use Kiri;
 use Kiri\Abstracts\Config;
+use Kiri\Annotation\AbstractAttribute;
 use Kiri\Core\Network;
 use Kiri\Exception\ConfigException;
-use Kiri;
+use Kiri\Message\Handler\Router;
 use Kiri\Rpc\RpcManager;
-use Kiri\Annotation\AbstractAttribute;
 use ReflectionException;
 
 #[\Attribute(\Attribute::TARGET_CLASS)] class JsonRpc extends AbstractAttribute
@@ -35,12 +36,13 @@ use ReflectionException;
 	 * @param mixed $class
 	 * @param mixed|string $method
 	 * @return mixed
-	 * @throws ReflectionException
 	 * @throws ConfigException
 	 */
 	public function execute(mixed $class, mixed $method = ''): bool
 	{
-		return Kiri::getDi()->get(RpcManager::class)->add($this->service, $class, $this->create());
+		$manager = Kiri::getDi()->get(RpcManager::class);
+
+		return $manager->add($this->service, $class, $this->create());
 	}
 
 

@@ -11,8 +11,10 @@ use Kiri\Consul\Agent;
 use Kiri\Context;
 use Kiri\Exception\ConfigException;
 use Kiri\Message\Constrict\RequestInterface;
+use Kiri\Message\Handler\DataGrip;
 use Kiri\Message\Handler\Handler;
 use Kiri\Message\Handler\Router;
+use Kiri\Message\Handler\RouterCollector;
 use Kiri\Message\ServerRequest;
 use Kiri\Server\Contract\OnCloseInterface;
 use Kiri\Server\Contract\OnConnectInterface;
@@ -31,7 +33,6 @@ use Swoole\Coroutine\Channel;
 use Swoole\Server;
 use Swoole\Timer;
 
-
 /**
  *
  */
@@ -47,10 +48,13 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public Annotation $annotation;
 
 
-	private RpcManager $manager;
+	public RpcManager $manager;
 
 
 	private int $timerId;
+
+
+	public RouterCollector $collector;
 
 
 	/**
@@ -71,6 +75,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		$provider->on(OnServerBeforeStart::class, [$this, 'register']);
 
 		$this->manager = Kiri::getDi()->get(RpcManager::class);
+
+		$this->collector = $this->container->get(DataGrip::class)->get('rpc');
 	}
 
 
@@ -212,13 +218,15 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	private function dispatch($data): array
 	{
 		try {
-			[$handler, $params] = $this->getContainer()->get(RpcManager::class)->get($data['service'], $data['method']);
-			if (is_null($handler)) {
+			$handler = $this->collector->find($data['service'], 'GET');
+			if (is_integer($handler) || is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
+				$params = $this->container->getMethodParameters($handler->callback::class, $data['method']);
+
 				Context::setContext(RequestInterface::class, $this->createServerRequest($params));
 
-				return $this->handler($handler);
+				return $this->handler($handler, $data['method'], $params);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -240,13 +248,16 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @param Handler $handler
+	 * @param string $method
+	 * @param $params
 	 * @return array
 	 */
-	private function handler(Handler $handler): array
+	private function handler(Handler $handler, string $method, $params): array
 	{
+		$result = call_user_func([$handler->callback, $method], ...$params);
 		return [
 			'jsonrpc' => '2.0',
-			'result'  => call_user_func($handler->callback, ...$handler->params),
+			'result'  => $result,
 			'id'      => $data['id'] ?? null
 		];
 	}

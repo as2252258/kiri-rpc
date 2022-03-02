@@ -8,8 +8,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Annotation\Inject;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
-use Kiri\Message\Handler\Handler;
-use ReflectionException;
+use Kiri\Message\Handler\Router;
 
 class RpcManager extends Component
 {
@@ -84,24 +83,15 @@ class RpcManager extends Component
 	 * @param string $class
 	 * @param array $serviceConfig
 	 * @return bool
-	 * @throws ReflectionException
 	 */
 	public function add(string $name, string $class, array $serviceConfig): bool
 	{
-		$methods = Kiri::getDi()->getReflect($class);
-		$lists = $methods->getMethods(\ReflectionMethod::IS_PUBLIC);
-
 		if (!isset($this->_rpc[$name])) {
 			$this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['ID'], 'config' => $serviceConfig];
 		}
-
-		foreach ($lists as $reflection) {
-			if ($reflection->getDeclaringClass() != $class) {
-				continue;
-			}
-			$methodName = $reflection->getName();
-			$this->_rpc[$name]['methods'][$methodName] = [new Handler('/', [$class, $methodName]), null];
-		}
+		Router::addServer('rpc', static function () use ($name, $class) {
+			Router::get($name, $class);
+		});
 		return true;
 	}
 
