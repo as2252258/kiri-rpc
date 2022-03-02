@@ -222,11 +222,15 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			if (is_integer($handler) || is_null($handler)) {
 				throw new \Exception('Method not found', -32601);
 			} else {
-				$params = $this->container->getMethodParameters($handler->callback::class, $data['method']);
+				$controller = $handler->callback[0];
+				if (!method_exists($controller, $data['method'])) {
+					throw new \Exception('Method not found', -32601);
+				}
+				$params = $this->container->getMethodParameters($controller::class, $data['method']);
 
 				Context::setContext(RequestInterface::class, $this->createServerRequest($params));
 
-				return $this->handler($handler, $data['method'], $params);
+				return $this->handler($controller, $data['method'], $params);
 			}
 		} catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
@@ -247,14 +251,14 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
-	 * @param Handler $handler
+	 * @param $controller
 	 * @param string $method
 	 * @param $params
 	 * @return array
 	 */
-	private function handler(Handler $handler, string $method, $params): array
+	private function handler($controller, string $method, $params): array
 	{
-		$result = call_user_func([$handler->callback, $method], ...$params);
+		$result = call_user_func([$controller, $method], ...$params);
 		return [
 			'jsonrpc' => '2.0',
 			'result'  => $result,
