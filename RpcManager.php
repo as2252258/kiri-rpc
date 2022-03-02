@@ -87,7 +87,7 @@ class RpcManager extends Component
 	public function add(string $name, string $class, array $serviceConfig): bool
 	{
 		if (!isset($this->_rpc[$name])) {
-			$this->_rpc[$name] = ['methods' => [], 'id' => $serviceConfig['ID'], 'config' => $serviceConfig];
+			$this->_rpc[$name] = ['id' => $serviceConfig['ID'], 'config' => $serviceConfig];
 		}
 		Router::addServer('rpc', static function () use ($name, $class) {
 			Router::get($name, $class);
@@ -121,17 +121,6 @@ class RpcManager extends Component
 				return;
 			}
 		}
-	}
-
-
-	/**
-	 * @param string $name
-	 * @param string $method
-	 * @return mixed
-	 */
-	public function get(string $name, string $method): array
-	{
-		return $this->_rpc[$name]['methods'][$method] ?? [null, null];
 	}
 
 }
