@@ -12,6 +12,7 @@ use Kiri\Pool\Pool;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Kiri\Annotation\Inject;
 
 /**
  *
@@ -26,6 +27,20 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	public Pool $pool;
 
 
+	/**
+	 * @var RpcManager
+	 */
+	#[Inject(RpcManager::class)]
+	public RpcManager $manager;
+
+
+	/**
+	 * @var RpcClientInterface
+	 */
+	#[Inject(RpcClientInterface::class)]
+	public RpcClientInterface $client;
+
+
 	protected string $name = '';
 
 
@@ -38,9 +53,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 */
 	public function notify(string $method, mixed $data, string $version = '2.0'): void
 	{
-		$config = $this->get_consul($this->name);
-		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
-		$transporter->withConfig($config)->sendRequest(
+		$this->client->withConfig($this->get_consul($this->name))->sendRequest(
 			$this->requestBody([
 				'jsonrpc' => $version,
 				'service' => $this->name,
@@ -75,9 +88,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	{
 		if (empty($id)) $id = Number::create(time());
 
-		$config = $this->get_consul($this->name);
-		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
-		return $transporter->withConfig($config)->sendRequest(
+		return $this->client->withConfig($this->get_consul($this->name))->sendRequest(
 			$this->requestBody([
 				'jsonrpc' => $version,
 				'service' => $this->name,
@@ -97,9 +108,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 	 */
 	public function batch(array $data): mixed
 	{
-		$config = $this->get_consul($this->name);
-		$transporter = Kiri::getDi()->get(RpcClientInterface::class);
-		return $transporter->withConfig($config)->sendRequest(
+		return $this->client->withConfig($this->get_consul($this->name))->sendRequest(
 			$this->requestBody($data)
 		);
 	}
@@ -116,7 +125,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
 		if (empty($service)) {
 			throw new RpcServiceException('You need set rpc service name if used.');
 		}
-		$sf = Kiri::getDi()->get(RpcManager::class)->getServices($service);
+		$sf = $this->manager->getServices($service);
 		if (empty($sf) || !is_array($sf)) {
 			throw new RpcServiceException('You need set rpc service name if used.');
 		}

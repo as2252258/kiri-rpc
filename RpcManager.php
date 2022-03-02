@@ -5,6 +5,7 @@ namespace Kiri\Rpc;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
+use Kiri\Annotation\Inject;
 use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Message\Handler\Handler;
@@ -20,27 +21,8 @@ class RpcManager extends Component
 	private array $_rpc = [];
 
 
-	/**
-	 * @param $serviceName
-	 * @return void
-	 * @throws Exception
-	 */
-	public function async($serviceName): void
-	{
-		$this->reRegister($serviceName);
-
-		$lists = Kiri::getDi()->get(Health::class)->setQuery('passing=true')->service($serviceName);
-		if ($lists->getStatusCode() != 200) {
-			return;
-		}
-		$body = json_decode($lists->getBody(), true);
-		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
-		if (!empty($body) && is_array($body)) {
-			file_put_contents($file, json_encode(array_column($body, 'Service')), LOCK_EX);
-		} else {
-			file_put_contents($file, json_encode([]), LOCK_EX);
-		}
-	}
+	#[Inject(Health::class)]
+	public Health $health;
 
 
 	/**
@@ -71,7 +53,7 @@ class RpcManager extends Component
 	{
 		try {
 			foreach ($this->_rpc as $name => $list) {
-				$this->async($name);
+				$this->reRegister($name);
 			}
 		} catch (\Throwable $throwable) {
 			$this->logger->error(error_trigger_format($throwable));
@@ -81,20 +63,19 @@ class RpcManager extends Component
 
 	/**
 	 * @param $serviceName
-	 * @return array
-	 * @throws Exception
+	 * @return array|null
 	 */
-	public function getServices($serviceName): array
+	public function getServices($serviceName): ?array
 	{
-		$file = storage('.rpc.clients.' . md5($serviceName), 'rpc');
-		if (!file_exists($file) || filesize($file) < 10) {
-			$this->async($serviceName);
+		$lists = $this->health->setQuery('passing=true')->service($serviceName);
+		if ($lists->getStatusCode() != 200) {
+			return null;
 		}
-		$content = json_decode(file_get_contents($file), true);
-		if (empty($content) || !is_array($content)) {
-			return [];
+		$body = json_decode($lists->getBody(), true);
+		if (empty($body)) {
+			return null;
 		}
-		return $content;
+		return array_column($body, 'Service');
 	}
 
 
