@@ -2,6 +2,7 @@
 
 namespace Kiri\Rpc;
 
+use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
@@ -12,7 +13,6 @@ use Kiri\Context;
 use Kiri\Exception\ConfigException;
 use Kiri\Message\Constrict\RequestInterface;
 use Kiri\Message\Handler\DataGrip;
-use Kiri\Message\Handler\Handler;
 use Kiri\Message\Handler\Router;
 use Kiri\Message\Handler\RouterCollector;
 use Kiri\Message\ServerRequest;
@@ -25,6 +25,7 @@ use Kiri\Server\Events\OnTaskerStart;
 use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStart;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
@@ -55,6 +56,17 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	public RouterCollector $collector;
+
+
+	/**
+	 * @param ContainerInterface $container
+	 * @param array $config
+	 * @throws Exception
+	 */
+	public function __construct(public ContainerInterface $container, array $config = [])
+	{
+		parent::__construct($config);
+	}
 
 
 	/**
@@ -220,11 +232,11 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		try {
 			$handler = $this->collector->find($data['service'], 'GET');
 			if (is_integer($handler) || is_null($handler)) {
-				throw new \Exception('Method not found', -32601);
+				throw new Exception('Method not found', -32601);
 			} else {
 				$controller = $handler->callback[0];
 				if (!method_exists($controller, $data['method'])) {
-					throw new \Exception('Method not found', -32601);
+					throw new Exception('Method not found', -32601);
 				}
 				$params = $this->container->getMethodParameters($controller::class, $data['method']);
 
@@ -242,7 +254,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	/**
 	 * @param $params
 	 * @return ServerRequestInterface
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function createServerRequest($params): ServerRequestInterface
 	{
