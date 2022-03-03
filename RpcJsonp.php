@@ -7,9 +7,9 @@ use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Annotation\Annotation;
-use Kiri\Annotation\Inject;
 use Kiri\Consul\Agent;
 use Kiri\Context;
+use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Message\Constrict\RequestInterface;
 use Kiri\Message\Handler\DataGrip;
@@ -41,29 +41,28 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 {
 
 
-	#[Inject(Router::class)]
-	public Router $router;
-
-
-	#[Inject(Annotation::class)]
-	public Annotation $annotation;
-
-
-	public RpcManager $manager;
-
-
 	private int $timerId;
-
-
-	public RouterCollector $collector;
 
 
 	/**
 	 * @param ContainerInterface $container
+	 * @param Router $router
+	 * @param Annotation $annotation
+	 * @param DataGrip $dataGrip
+	 * @param RpcManager $manager
+	 * @param RouterCollector $collector
+	 * @param EventProvider $eventProvider
 	 * @param array $config
 	 * @throws Exception
 	 */
-	public function __construct(public ContainerInterface $container, array $config = [])
+	public function __construct(public ContainerInterface $container,
+	                            public Router             $router,
+	                            public Annotation         $annotation,
+	                            public DataGrip           $dataGrip,
+	                            public RpcManager         $manager,
+	                            public RouterCollector    $collector,
+	                            public EventProvider      $eventProvider,
+	                            array                     $config = [])
 	{
 		parent::__construct($config);
 	}
@@ -71,24 +70,19 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 	/**
 	 * @return void
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
 	 * @throws ReflectionException
 	 */
 	public function init(): void
 	{
-		$provider = $this->getEventProvider();
-		$provider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
+		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
 
 		scan_directory(APP_PATH . 'rpc', 'app\Rpc');
 
-		$provider->on(OnWorkerStart::class, [$this, 'consulWatches']);
-		$provider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
-		$provider->on(OnServerBeforeStart::class, [$this, 'register']);
+		$this->eventProvider->on(OnWorkerStart::class, [$this, 'consulWatches']);
+		$this->eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
+		$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
 
-		$this->manager = Kiri::getDi()->get(RpcManager::class);
-
-		$this->collector = $this->container->get(DataGrip::class)->get('rpc');
+		$this->collector = $this->dataGrip->get('rpc');
 	}
 
 
@@ -101,7 +95,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
 	{
 		$doneList = $this->manager->doneList();
-		$agent = $this->getContainer()->get(Agent::class);
+		$agent = $this->container->get(Agent::class);
 		foreach ($doneList as $value) {
 			$agent->service->deregister($value['config']['ID']);
 			$agent->checks->deregister($value['config']['Check']['CheckId']);
