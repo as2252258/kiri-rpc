@@ -52,12 +52,11 @@ trait TraitTransporter
 	 */
 	private function newClient(): Coroutine\Client|Client
 	{
-		$alias = $this->alias($this->config);
-		$client = $this->clients[$alias] ?? null;
-		if (is_null($client)) {
-			$client = Context::inCoroutine() ? new Coroutine\Client(SWOOLE_SOCK_TCP) : new Client(SWOOLE_SOCK_TCP);
-			$this->clients[$alias] = $client;
-		}
+		if (Context::inCoroutine()) {
+			$client = new Coroutine\Client(SWOOLE_SOCK_TCP);
+		} else {
+            $client = new Client(SWOOLE_SOCK_TCP);
+        }
 		[$host, $port] = [$this->config['Address'], $this->config['Port']];
 		if (!$client->isConnected() && !$client->connect($host, $port, 60)) {
 			throw new Exception('connect fail.');

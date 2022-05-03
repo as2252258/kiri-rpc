@@ -4,6 +4,7 @@ namespace Kiri\Rpc;
 
 
 use Exception;
+use JetBrains\PhpStorm\ArrayShape;
 use Kiri\Message\ServerRequest;
 use Kiri\Message\Stream;
 use Kiri\Core\Number;
@@ -120,6 +121,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
      * @throws RpcServiceException|\ReflectionException
      * @throws Exception
      */
+    #[ArrayShape(['Address' => "mixed", 'Port' => "mixed"])]
     private function get_consul($service): array
     {
         if (empty($service)) {
@@ -137,6 +139,7 @@ abstract class JsonRpcConsumers implements OnRpcConsumerInterface
      * @param $services
      * @return array
      */
+    #[ArrayShape(['Address' => "mixed", 'Port' => "mixed"])]
     private function _loadRand($services): array
     {
         $array = [];
