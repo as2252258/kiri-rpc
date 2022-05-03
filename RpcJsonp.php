@@ -3,6 +3,7 @@
 namespace Kiri\Rpc;
 
 use Exception;
+use JetBrains\PhpStorm\ArrayShape;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
@@ -92,7 +93,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
 	 */
-	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown)
+	public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown): void
 	{
 		$doneList = $this->manager->doneList();
 		$agent = $this->container->get(Agent::class);
@@ -123,7 +124,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @param OnWorkerExit $exit
 	 * @return void
 	 */
-	public function onWorkerExit(OnWorkerExit $exit)
+	public function onWorkerExit(OnWorkerExit $exit): void
 	{
 		Timer::clear($this->timerId);
 	}
@@ -226,19 +227,19 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 		try {
 			$handler = $this->collector->find($data['service'], 'GET');
 			if (is_integer($handler) || is_null($handler)) {
-				throw new Exception('Method not found', -32601);
-			} else {
-				$controller = $handler->callback[0];
-				if (!method_exists($controller, $data['method'])) {
-					throw new Exception('Method not found', -32601);
-				}
-				$params = $this->container->getMethodParameters($controller::class, $data['method']);
+				throw new Exception('Handler not found', -32601);
+            }
 
-				Context::setContext(RequestInterface::class, $this->createServerRequest($params));
+            $controller = $handler->callback[0];
+            if (!method_exists($controller, $data['method'])) {
+                throw new Exception('Method not found', -32601);
+            }
+            $params = $this->container->getMethodParameters($controller::class, $data['method']);
 
-				return $this->handler($controller, $data['method'], $params);
-			}
-		} catch (\Throwable $throwable) {
+            Context::setContext(RequestInterface::class, $this->createServerRequest($params));
+
+            return $this->handler($controller, $data['method'], $params);
+        } catch (\Throwable $throwable) {
 			$code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
 			return $this->failure($code, jTraceEx($throwable), [], $data['id'] ?? null);
 		}
@@ -262,7 +263,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @param $params
 	 * @return array
 	 */
-	private function handler($controller, string $method, $params): array
+    #[ArrayShape([])]
+    private function handler($controller, string $method, $params): array
 	{
 		$result = call_user_func([$controller, $method], ...$params);
 		return [
@@ -280,6 +282,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 * @param null $id
 	 * @return array
 	 */
+    #[ArrayShape([])]
 	protected function failure($code, $message, array $data = [], $id = null): array
 	{
 		$error = [
