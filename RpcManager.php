@@ -29,8 +29,8 @@ class RpcManager extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function reRegister(string $serviceName)
-	{
+	public function reRegister(string $serviceName): void
+    {
 		$config = $this->_rpc[$serviceName] ?? [];
 		if (empty($config)) {
 			return;
@@ -90,6 +90,8 @@ class RpcManager extends Component
 			$this->_rpc[$name] = ['id' => $serviceConfig['ID'], 'config' => $serviceConfig];
 		}
 		Router::addServer('rpc', static function () use ($name, $class) {
+
+            var_dump($name, $class);
 			Router::get($name, $class);
 		});
 		return true;
