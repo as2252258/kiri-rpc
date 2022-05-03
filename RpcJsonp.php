@@ -191,8 +191,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
             for ($i = 0; $i < $total; $i++) {
                 $result[] = $channel->pop();
             }
+            $result = json_encode($result, JSON_UNESCAPED_UNICODE);
         }
-        $server->send($fd, json_encode($result, JSON_UNESCAPED_UNICODE));
+        $server->send($fd, $result);
     }
 
 
@@ -229,11 +230,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
                 $data['service'] = '/' . $data['service'];
             }
             $handler = $this->collector->find($data['service'], 'GET');
-            var_dump($handler, $data);
             if (is_integer($handler) || is_null($handler)) {
                 throw new Exception('Handler not found', -32601);
             }
-
             $controller = $this->container->get($handler->callback[0]);
             if (!method_exists($controller, $data['method'])) {
                 throw new Exception('Method not found', -32601);
