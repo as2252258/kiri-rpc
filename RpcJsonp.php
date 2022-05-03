@@ -234,7 +234,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
                 throw new Exception('Handler not found', -32601);
             }
 
-            $controller = $handler->callback[0];
+            $controller = $this->container->get($handler->callback[0]);
             if (!method_exists($controller, $data['method'])) {
                 throw new Exception('Method not found', -32601);
             }
