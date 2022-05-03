@@ -4,6 +4,7 @@ namespace Kiri\Rpc;
 
 use Exception;
 use Kiri\Context;
+use Kiri\Core\Json;
 use Swoole\Client;
 use Swoole\Coroutine;
 
@@ -37,7 +38,7 @@ trait TraitTransporter
 	private function request(Client|Coroutine\Client $client, $content, bool $isClose): mixed
 	{
 		$client->send($content);
-		$read = $client->recv();
+		$read = Json::decode($client->recv());
 		if ($isClose) {
 			$client->close();
 		}
