@@ -226,9 +226,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
     private function dispatch($data): array
     {
         try {
-            if (!str_starts_with($data['service'], '/')) {
-                $data['service'] = '/' . $data['service'];
-            }
             $handler = $this->collector->find($data['service'], 'GET');
             if (is_integer($handler) || is_null($handler)) {
                 throw new Exception('Handler not found', -32601);
