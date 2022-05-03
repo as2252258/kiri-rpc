@@ -38,7 +38,7 @@ trait TraitTransporter
 	private function request(Client|Coroutine\Client $client, $content, bool $isClose): mixed
 	{
 		$client->send($content);
-		$read = Json::decode($client->recv());
+		$read = $client->recv();
 		if ($isClose) {
 			$client->close();
 		}
