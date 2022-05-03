@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  *
  */
-class JsonRpcTransporter implements ClientInterface
+class JsonRpcTransporter implements RpcClientInterface
 {
 
 

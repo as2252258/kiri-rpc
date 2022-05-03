@@ -8,12 +8,11 @@ use Kiri\Message\Response;
 use Kiri\Message\Stream;
 use Kiri\Abstracts\Config;
 use Kiri\Exception\ConfigException;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Swoole\Coroutine\Client;
 
-class JsonRpcPoolTransporter implements ClientInterface
+class JsonRpcPoolTransporter implements RpcClientInterface
 {
 
 
