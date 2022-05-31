@@ -4,6 +4,7 @@ namespace Kiri\Rpc;
 
 use Exception;
 use Kiri;
+use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Component;
 use Kiri\Annotation\Inject;
 use Kiri\Consul\Agent;
@@ -12,39 +13,39 @@ use Kiri\Message\Handler\Router;
 
 class RpcManager extends Component
 {
-
-
+	
+	
 	/**
 	 * @var array
 	 */
 	private array $_rpc = [];
-
-
+	
+	
 	#[Inject(Health::class)]
 	public Health $health;
-
-
+	
+	
 	/**
 	 * @param string $serviceName
 	 * @return void
 	 * @throws Exception
 	 */
 	public function reRegister(string $serviceName): void
-    {
+	{
 		$config = $this->_rpc[$serviceName] ?? [];
 		if (empty($config)) {
 			return;
 		}
 		$service = Kiri::getDi()->get(Agent::class);
-
+		
 		$info = $service->service->service_health($config['config']['ID']);
 		if ($info->getStatusCode() == 200) {
 			return;
 		}
 		$service->service->register($config['config']);
 	}
-
-
+	
+	
 	/**
 	 * @throws Exception
 	 */
@@ -58,8 +59,8 @@ class RpcManager extends Component
 			$this->logger->error(error_trigger_format($throwable));
 		}
 	}
-
-
+	
+	
 	/**
 	 * @param $serviceName
 	 * @return array|null
@@ -76,8 +77,8 @@ class RpcManager extends Component
 		}
 		return array_column($body, 'Service');
 	}
-
-
+	
+	
 	/**
 	 * @param string $name
 	 * @param string $class
@@ -87,17 +88,15 @@ class RpcManager extends Component
 	public function add(string $name, string $class, array $serviceConfig): bool
 	{
 		if (!isset($this->_rpc[$name])) {
-			$this->_rpc[$name] = ['id' => $serviceConfig['ID'], 'config' => $serviceConfig];
+//			$this->_rpc[$name] = ['id' => $serviceConfig['ID'], 'config' => $serviceConfig];
 		}
 		Router::addServer('rpc', static function () use ($name, $class) {
-
-            var_dump($name, $class);
 			Router::get($name, $class);
 		});
 		return true;
 	}
-
-
+	
+	
 	/**
 	 * @return array
 	 */
@@ -109,20 +108,24 @@ class RpcManager extends Component
 		}
 		return $array;
 	}
-
-
+	
+	
 	/**
+	 * @return void
+	 * @throws Kiri\Exception\ConfigException
 	 */
-	public function register()
+	public function register(): void
 	{
 		$agent = Kiri::getDi()->get(Agent::class);
-		foreach ($this->_rpc as $list) {
-			$agent->service->deregister($list['config']['ID']);
-			$data = $agent->service->register($list['config']);
-			if ($data->getStatusCode() != 200) {
-				return;
-			}
+		
+		$list = Config::get("rpc.consul", null, true);
+		
+		$agent->service->deregister($list['ID']);
+		$data = $agent->service->register($list);
+		if ($data->getStatusCode() != 200) {
+			$this->logger->error($data->getBody());
 		}
+		
 	}
-
+	
 }
