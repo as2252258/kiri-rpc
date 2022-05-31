@@ -52,9 +52,9 @@ class RpcManager extends Component
 	public function tick(): void
 	{
 		try {
-			foreach ($this->_rpc as $name => $list) {
-				$this->reRegister($name);
-			}
+//			foreach ($this->_rpc as $name => $list) {
+//				$this->reRegister($name);
+//			}
 		} catch (\Throwable $throwable) {
 			$this->logger->error(error_trigger_format($throwable));
 		}
