@@ -30,13 +30,11 @@ class RpcManager extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function reRegister(string $serviceName): void
+	public function reRegister(): void
 	{
-		$config = $this->_rpc[$serviceName] ?? [];
-		if (empty($config)) {
-			return;
-		}
 		$service = Kiri::getDi()->get(Agent::class);
+		
+		$config = Config::get("rpc.consul", null, true);
 		
 		$info = $service->service->service_health($config['config']['ID']);
 		if ($info->getStatusCode() == 200) {
@@ -52,9 +50,7 @@ class RpcManager extends Component
 	public function tick(): void
 	{
 		try {
-//			foreach ($this->_rpc as $name => $list) {
-//				$this->reRegister($name);
-//			}
+			$this->reRegister();
 		} catch (\Throwable $throwable) {
 			$this->logger->error(error_trigger_format($throwable));
 		}
