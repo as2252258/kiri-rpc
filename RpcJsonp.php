@@ -91,16 +91,20 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
      * @param OnBeforeShutdown $beforeShutdown
      * @return void
      * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws NotFoundExceptionInterface|ConfigException
      */
     public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown): void
     {
-        $doneList = $this->manager->doneList();
         $agent = $this->container->get(Agent::class);
-        foreach ($doneList as $value) {
-            $agent->service->deregister($value['config']['ID']);
-            $agent->checks->deregister($value['config']['Check']['CheckId']);
-        }
+	    $value = Config::get("rpc.consul", []);
+		if (empty($value)) {
+			return;
+		}
+		
+		$this->logger->debug("disconnect consul.");
+		
+	    $agent->service->deregister($value['ID']);
+	    $agent->checks->deregister($value['Check']['CheckId']);
     }
 
 
