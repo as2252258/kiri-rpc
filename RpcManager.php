@@ -26,9 +26,8 @@ class RpcManager extends Component
 	
 	
 	/**
-	 * @param string $serviceName
 	 * @return void
-	 * @throws Exception
+	 * @throws Kiri\Exception\ConfigException
 	 */
 	public function reRegister(): void
 	{
@@ -36,11 +35,11 @@ class RpcManager extends Component
 		
 		$config = Config::get("rpc.consul", null, true);
 		
-		$info = $service->service->service_health($config['config']['ID']);
+		$info = $service->service->service_health($config['ID']);
 		if ($info->getStatusCode() == 200) {
 			return;
 		}
-		$service->service->register($config['config']);
+		$service->service->register($config);
 	}
 	
 	
