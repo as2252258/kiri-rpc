@@ -128,13 +128,21 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
     {
         Timer::clear($this->timerId);
     }
-
-
-    /**
-     * @param OnServerBeforeStart $server
-     */
+	
+	
+	/**
+	 * @param OnServerBeforeStart $server
+	 * @throws ConfigException
+	 */
     public function register(OnServerBeforeStart $server)
     {
+		$consumers = Config::get("rpc.consumers", []);
+		if (!empty($consumers)) {
+			$manager = Kiri::getDi()->get(RpcManager::class);
+			foreach ($consumers as $service => $consumer) {
+				$manager->add($service, $consumer);
+			}
+		}
         $this->manager->register();
     }
 
