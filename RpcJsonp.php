@@ -28,6 +28,7 @@ use Kiri\Server\Events\OnWorkerStart;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Kiri\Consul\Catalog\Catalog;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 use Swoole\Coroutine;
@@ -95,16 +96,14 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
      */
     public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown): void
     {
-        $agent = $this->container->get(Agent::class);
+        $agent = $this->container->get(Catalog::class);
 	    $value = Config::get("rpc.consul", []);
 		if (empty($value)) {
 			return;
 		}
 		
 		$this->logger->debug("disconnect consul.");
-		
-	    $agent->service->deregister($value['ID']);
-	    $agent->checks->deregister($value['Check']['CheckId']);
+		$agent->deregister(["node" => $value['ID']]);
     }
 
 
