@@ -95,9 +95,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
      */
     public function onBeforeShutdown(OnBeforeShutdown $beforeShutdown): void
     {
-		if ($beforeShutdown->server->worker_id != 0) {
+		if (env('environmental_workerId') != 0) {
 			return;
 		}
+
         $agent = $this->container->get(Agent::class);
 	    $value = Config::get("rpc.consul", []);
 		if (empty($value)) {
