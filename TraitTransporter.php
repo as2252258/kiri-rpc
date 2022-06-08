@@ -32,17 +32,12 @@ trait TraitTransporter
 	/**
 	 * @param Client|Coroutine\Client $client
 	 * @param $content
-	 * @param bool $isClose
 	 * @return mixed
 	 */
-	private function request(Client|Coroutine\Client $client, $content, bool $isClose): mixed
+	private function request(Client|Coroutine\Client $client, $content): mixed
 	{
 		$client->send($content);
-		$read = $client->recv();
-		if ($isClose) {
-			$client->close();
-		}
-		return $read;
+		return $client->recv();
 	}
 
 

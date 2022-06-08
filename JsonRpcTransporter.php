@@ -28,9 +28,11 @@ class JsonRpcTransporter implements RpcClientInterface
 	{
 		$content = $request->getBody()->getContents();
 
-		$response = $this->request($this->newClient(), $content, true);
+		$body = $this->request($this->newClient(), $content);
 
-		return (new Response())->withBody(new Stream($response));
+		$response = \Kiri::getDi()->get(ResponseInterface::class);
+
+		return $response->withBody(new Stream($body));
 	}
 
 
