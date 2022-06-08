@@ -42,7 +42,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 {
 
 
-    private int $timerId;
+    private int $timerId = -1;
 
 
     /**
@@ -134,7 +134,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
      */
     public function onWorkerExit(OnWorkerExit $exit): void
     {
-        Timer::clear($this->timerId);
+		if ($this->timerId) {
+			Timer::clear($this->timerId);
+		}
     }
 	
 	
