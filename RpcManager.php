@@ -11,51 +11,20 @@ use Kiri\Consul\Agent;
 use Kiri\Consul\Health;
 use Kiri\Message\Handler\Router;
 
+
+/**
+ * class RpcManager
+ */
 class RpcManager extends Component
 {
-	
-	
+
 	/**
-	 * @var array
+	 * @var Health
 	 */
-	private array $_rpc = [];
-	
-	
 	#[Inject(Health::class)]
 	public Health $health;
-	
-	
-	/**
-	 * @return void
-	 * @throws Kiri\Exception\ConfigException
-	 */
-	public function reRegister(): void
-	{
-		$service = Kiri::getDi()->get(Agent::class);
-		
-		$config = Config::get("rpc.consul", null, true);
-		
-		$info = $service->service->service_health($config['ID']);
-		if ($info->getStatusCode() == 200) {
-			return;
-		}
-		$service->service->register($config);
-	}
-	
-	
-	/**
-	 * @throws Exception
-	 */
-	public function tick(): void
-	{
-		try {
-			$this->reRegister();
-		} catch (\Throwable $throwable) {
-			$this->logger->error(error_trigger_format($throwable));
-		}
-	}
-	
-	
+
+
 	/**
 	 * @param $serviceName
 	 * @return array|null
@@ -72,8 +41,8 @@ class RpcManager extends Component
 		}
 		return array_column($body, 'Service');
 	}
-	
-	
+
+
 	/**
 	 * @param string $name
 	 * @param string $class
@@ -86,37 +55,22 @@ class RpcManager extends Component
 		});
 		return true;
 	}
-	
-	
+
+
 	/**
-	 * @return array
-	 */
-	public function doneList(): array
-	{
-		$array = [];
-		foreach ($this->_rpc as $list) {
-			$array[] = $list;
-		}
-		return $array;
-	}
-	
-	
-	/**
+	 * @param array $config
 	 * @return void
-	 * @throws Kiri\Exception\ConfigException
 	 */
-	public function register(): void
+	public function register(array $config): void
 	{
 		$agent = Kiri::getDi()->get(Agent::class);
-		
-		$list = Config::get("rpc.consul", null, true);
-		
-		$agent->service->deregister($list['ID']);
-		$data = $agent->service->register($list);
+		$agent->checks->deregister($config['ID']);
+		$agent->service->deregister($config['ID']);
+		$data = $agent->service->register($config);
 		if ($data->getStatusCode() != 200) {
 			$this->logger->error($data->getBody());
 		}
-		
+
 	}
-	
+
 }
