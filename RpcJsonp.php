@@ -22,9 +22,6 @@ use Kiri\Server\Contract\OnConnectInterface;
 use Kiri\Server\Contract\OnReceiveInterface;
 use Kiri\Server\Events\OnBeforeShutdown;
 use Kiri\Server\Events\OnServerBeforeStart;
-use Kiri\Server\Events\OnTaskerStart;
-use Kiri\Server\Events\OnWorkerExit;
-use Kiri\Server\Events\OnWorkerStart;
 use Psr\Container\ContainerExceptionInterface;
 use Kiri\Di\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -33,7 +30,6 @@ use ReflectionException;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Server;
-use Swoole\Timer;
 
 /**
  *
@@ -285,11 +281,10 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 
 
 	/**
-	 * @param \Swoole\WebSocket\Server $server
 	 * @param int $fd
 	 * @return void
 	 */
-	public function onClose(\Swoole\WebSocket\Server $server, int $fd): void
+	public function onClose(int $fd): void
 	{
 		// TODO: Implement onClose() method.
 	}
