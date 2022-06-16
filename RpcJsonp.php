@@ -214,7 +214,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			if (!method_exists($controller, $data['method'])) {
 				throw new Exception('Method not found', -32601);
 			}
-			$params = $this->container->getArgs($controller::class, $data['method']);
+			$params = $this->container->getArgs($data['method'], $controller::class);
 
 			Context::setContext(RequestInterface::class, $this->createServerRequest($params));
 
