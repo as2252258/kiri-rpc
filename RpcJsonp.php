@@ -10,6 +10,7 @@ use Kiri\Abstracts\Config;
 use Kiri\Annotation\Annotation;
 use Kiri\Consul\Agent;
 use Kiri\Context;
+use Kiri\Core\Json;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Message\Constrict\RequestInterface;
@@ -147,7 +148,9 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			$server->send($fd, $this->batchDispatch($data));
 		} catch (\Throwable $throwable) {
 			$this->logger->error('JsonRpc: ' . $throwable->getMessage());
-			$server->send($fd, $this->failure(-32700, 'Parse error语法解析错误'));
+			$response = Json::encode($this->failure(-32700, $throwable->getMessage()));
+			$server->send($fd, $response);
+			$server->close($fd);
 		}
 	}
 
