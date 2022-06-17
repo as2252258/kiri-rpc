@@ -150,7 +150,6 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 			$this->logger->error('JsonRpc: ' . $throwable->getMessage());
 			$response = Json::encode($this->failure(-32700, $throwable->getMessage()));
 			$server->send($fd, $response);
-			$server->close($fd);
 		}
 	}
 
