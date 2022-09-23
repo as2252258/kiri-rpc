@@ -158,7 +158,8 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function onReceive(Server $server, int $fd, int $reactor_id, string $data): bool
 	{
 		try {
-			if (!isJson($data)) return $server->send($fd, 'success', $reactor_id);
+			$data = json_decode($data, true);
+			if (is_null($data)) return $server->send($fd, 'success', $reactor_id);
 			$data = json_decode($data, true);
 			if (!is_array($data)) {
 				throw new Exception('Parse error语法解析错误', -32700);
