@@ -2,17 +2,13 @@
 
 namespace Kiri\Rpc;
 
-use Kiri\Message\Response;
-use Kiri\Message\Stream;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Exception;
 
 
 /**
  *
  */
-class JsonRpcTransporter implements RpcClientInterface
+class JsonRpcTransporter implements JsonRpcTransporterInterface
 {
 
 
@@ -20,19 +16,21 @@ class JsonRpcTransporter implements RpcClientInterface
 
 
 	/**
-	 * @param RequestInterface $request
-	 * @return ResponseInterface
-	 * @throws \Exception
+	 * @param string $content
+	 * @param string $service
+	 * @return string|bool
+	 * @throws RpcServiceException
+	 * @throws Exception
 	 */
-	public function sendRequest(RequestInterface $request): ResponseInterface
+	public function push(string $content, string $service): string|bool
 	{
-		$content = $request->getBody()->getContents();
+		$client = $this->get_consul($service)->newClient();
 
-		$body = $this->request($this->newClient(), $content);
+		$body = $this->request($client, $content);
 
-		$response = \Kiri::getDi()->get(ResponseInterface::class);
+		$client->close();
 
-		return $response->withBody(new Stream($body));
+		return $body;
 	}
 
 

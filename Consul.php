@@ -50,7 +50,7 @@ class Consul extends Component
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
 	 */
-	public function deregister()
+	public function deregister(): void
 	{
 		if (env('environmental') != Kiri::WORKER && env('environmental_workerId') != 0) {
 			return;

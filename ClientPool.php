@@ -51,7 +51,7 @@ class ClientPool extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function onBeforeShutdown()
+	public function onBeforeShutdown(): void
 	{
 		foreach ($this->names as $name) {
 			$this->getPool()->clean($name);

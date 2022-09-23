@@ -12,7 +12,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Swoole\Coroutine\Client;
 
-class JsonRpcPoolTransporter implements RpcClientInterface
+class JsonRpcPoolTransporter implements JsonRpcTransporterInterface
 {
 
 
@@ -23,32 +23,21 @@ class JsonRpcPoolTransporter implements RpcClientInterface
 	public ClientPool $pool;
 
 
-	const POOL_NAME = 'rpc.client.pool';
-
-
 	/**
+	 * @param string $content
+	 * @param string $service
+	 * @return string|bool
+	 * @throws ConfigException|RpcServiceException
 	 */
-	public function init()
+	public function push(string $content, string $service): string|bool
 	{
-	}
-
-
-	/**
-	 * @param RequestInterface $request
-	 * @return ResponseInterface
-	 * @throws Exception
-	 */
-	public function sendRequest(RequestInterface $request): ResponseInterface
-	{
-		$content = $request->getBody()->getContents();
-
-		$client = $this->getClient();
+		$client = $this->get_consul($service)->getClient();
 
 		$response = $this->request($client, $content);
 
 		$this->pool->push($client, $this->config['Address'], $this->config['Port']);
 
-		return (new Response())->withBody(new Stream($response));
+		return $response;
 	}
 
 
