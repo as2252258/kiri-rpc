@@ -5,8 +5,7 @@ namespace Kiri\Rpc;
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
 use Kiri\Annotation\Inject;
-use Kiri\Context;
-use Kiri\Core\Json;
+use Kiri\Di\Context;
 use Swoole\Client;
 use Swoole\Coroutine;
 
