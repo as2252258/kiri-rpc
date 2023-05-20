@@ -4,8 +4,8 @@ namespace Kiri\Rpc;
 
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
-use Kiri\Annotation\Inject;
 use Kiri\Di\Context;
+use Kiri\Di\Inject\Container;
 use Swoole\Client;
 use Swoole\Coroutine;
 
@@ -16,7 +16,7 @@ trait TraitTransporter
 	/**
 	 * @var RpcManager
 	 */
-	#[Inject(RpcManager::class)]
+	#[Container(RpcManager::class)]
 	public RpcManager $manager;
 
 
@@ -24,13 +24,16 @@ trait TraitTransporter
 
 
 	/**
-	 * @param Client|Coroutine\Client $client
+	 * @param resource $client
 	 * @param $content
 	 * @return string|bool
 	 */
-	private function request(Client|Coroutine\Client $client, $content): string|bool
+	private function request(mixed $client, $content): string|bool
 	{
-		$client->send($content);
+        socket_write($client, $content, mb_strlen($content));
+
+        socket_read($client, 1024);
+
 		return $client->recv();
 	}
 

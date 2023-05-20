@@ -10,13 +10,21 @@
   "license": "MIT",
   "require": {
     "php": ">=8.0",
-    "ext-json": "*"
+    "ext-json": "*",
+    "start-point/etcd-php": "^1.1"
+  },
+  "replace": {
+    "symfony/polyfill-apcu": "*",
+    "symfony/polyfill-php80": "*",
+    "symfony/polyfill-mbstring": "*",
+    "symfony/polyfill-ctype": "*",
+    "symfony/polyfill-php73": "*",
+    "symfony/polyfill-php72": "*",
+    "symfony/polyfill-php81": "*"
   },
   "autoload": {
     "psr-4": {
       "Kiri\\Rpc\\": "./"
     }
-  },
-  "require-dev": {
   }
 }

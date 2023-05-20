@@ -2,10 +2,9 @@
 
 namespace Kiri\Rpc;
 
-use JetBrains\PhpStorm\ArrayShape;
-use Kiri\Annotation\Inject;
 use Kiri\Core\Json;
 use Kiri\Core\Number;
+use Kiri\Di\Inject\Container;
 
 abstract class AbstractRpcClient
 {
@@ -20,7 +19,7 @@ abstract class AbstractRpcClient
 	/**
 	 * @var JsonRpcTransporterInterface
 	 */
-	#[Inject(JsonRpcTransporterInterface::class)]
+	#[Container(JsonRpcTransporterInterface::class)]
 	private JsonRpcTransporterInterface $transporter;
 
 
