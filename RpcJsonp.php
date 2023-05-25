@@ -7,7 +7,6 @@ use JetBrains\PhpStorm\ArrayShape;
 use Kiri;
 use Kiri\Di\LocalService;
 use Kiri\Abstracts\Component;
-use Kiri\Abstracts\Config;
 use Kiri\Annotation\Annotation;
 use Kiri\Consul\Agent;
 use Kiri\Core\Json;
@@ -72,7 +71,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	public function init(): void
 	{
 		$this->eventProvider->on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
-//		$this->consul = Config::get('rpc.consul', null);
+//		$this->consul = \config('rpc.consul', null);
 //		if (!empty($this->consul)) {
 //			$this->eventProvider->on(OnServerBeforeStart::class, [$this, 'register']);
 //		}
@@ -89,7 +88,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function registerConsumers(): void
 	{
-		$consumers = Config::get('rpc.consumers', []);
+		$consumers = \config('rpc.consumers', []);
 		if (!is_array($consumers)) {
 			return;
 		}
@@ -128,7 +127,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 	 */
 	public function register(OnServerBeforeStart $server)
 	{
-		$consumers = Config::get("rpc.consumers", []);
+		$consumers = \config("rpc.consumers", []);
 		if (!empty($consumers)) {
 			foreach ($consumers as $service => $consumer) {
 				$this->manager->add($service, $consumer);
