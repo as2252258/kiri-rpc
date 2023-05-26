@@ -87,7 +87,7 @@ class ClientPool extends Component
     public function getPool($host, $port): Pool
     {
         $pool = Kiri::getDi()->get(Pool::class);
-        $pool->initConnections($host . '::' . $port, 10, function () use ($host, $port) {
+        $pool->created($host . '::' . $port, 10, function () use ($host, $port) {
             $client = stream_socket_client("tcp://$host:$port", $errCode, $errMessage, 3);
             if ($client === false) {
                 throw new Exception('Connect ' . $host . '::' . $port . ' fail');
