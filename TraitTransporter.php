@@ -72,7 +72,7 @@ trait TraitTransporter
 		if (count($array) < 2) {
 			$luck = $array[0];
 		} else {
-			$luck = Luckdraw::luck($array, 'Weight');
+			$luck = LotteryDraw::luck($array, 'Weight');
 		}
 		return [
 			'Address' => $luck['TaggedAddresses']['wan_ipv4']['Address'],
