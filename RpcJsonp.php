@@ -9,7 +9,6 @@ use Kiri\Di\LocalService;
 use Kiri\Abstracts\Component;
 use Kiri\Core\Json;
 use Kiri\Events\EventProvider;
-use Kiri\Exception\ConfigException;
 use Kiri\Server\Contract\OnCloseInterface;
 use Kiri\Server\Contract\OnConnectInterface;
 use Kiri\Server\Contract\OnReceiveInterface;

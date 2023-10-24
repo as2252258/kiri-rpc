@@ -5,6 +5,7 @@ namespace Kiri\Rpc;
 use Exception;
 use Kiri\Di\Inject\Container;
 use Kiri\Exception\ConfigException;
+use ReflectionException;
 
 class JsonRpcPoolTransporter implements JsonRpcTransporterInterface
 {
@@ -21,9 +22,8 @@ class JsonRpcPoolTransporter implements JsonRpcTransporterInterface
      * @param string $content
      * @param string $service
      * @return string|bool
-     * @throws ConfigException
      * @throws RpcServiceException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
 	public function push(string $content, string $service): string|bool
 	{
@@ -38,8 +38,7 @@ class JsonRpcPoolTransporter implements JsonRpcTransporterInterface
 
 
 	/**
-	 * @throws ConfigException
-	 * @throws Exception
+     * @throws Exception
 	 */
 	private function getClient()
 	{

@@ -1,8 +1,6 @@
 <?php
 
 use Kiri\Rpc\AbstractRpcClient;
-use Kiri\Rpc\Annotation\JsonRpc;
-use Kiri\Rpc\JsonRpcTransporterInterface;
 
 
 class TestRpc extends AbstractRpcClient

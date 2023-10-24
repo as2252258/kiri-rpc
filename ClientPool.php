@@ -5,13 +5,11 @@ namespace Kiri\Rpc;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
-use Kiri\Events\EventProvider;
-use Kiri\Exception\ConfigException;
 use Kiri\Pool\Pool;
-use Kiri\Di\Inject\Container;
 use Kiri\Server\Events\OnBeforeShutdown;
 use ReflectionException;
-use Swoole\Coroutine\Client;
+use Swoole\Coroutine\Client as CoroutineClient;
+use Swoole\Client as AsyncClient;
 
 
 /**
@@ -29,6 +27,9 @@ class ClientPool extends Component
     private array $names = [];
 
 
+    /**
+     * @return void
+     */
     public function init(): void
     {
         on(OnBeforeShutdown::class, [$this, 'onBeforeShutdown']);
@@ -51,8 +52,7 @@ class ClientPool extends Component
     /**
      * @param $config
      * @return resource
-     * @throws ConfigException
-     * @throws ReflectionException
+     * @throws Exception
      */
     public function get($config): mixed
     {
@@ -67,34 +67,48 @@ class ClientPool extends Component
 
 
     /**
-     * @param Client|\Swoole\Client $client
+     * @param CoroutineClient|AsyncClient $client
      * @param $host
      * @param $port
-     * @throws ConfigException|ReflectionException
+     * @throws Exception
      */
-    public function push(Client|\Swoole\Client $client, $host, $port)
+    public function push(CoroutineClient|AsyncClient $client, $host, $port)
     {
         $this->getPool($host, $port)->push($host . '::' . $port, $client);
     }
 
 
     /**
-     * @param $host
-     * @param $port
+     * @param string $host
+     * @param int $port
      * @return Pool
      * @throws ReflectionException
      */
-    public function getPool($host, $port): Pool
+    public function getPool(string $host, int $port): Pool
     {
         $pool = Kiri::getDi()->get(Pool::class);
-        $pool->created($host . '::' . $port, 10, function () use ($host, $port) {
-            $client = stream_socket_client("tcp://$host:$port", $errCode, $errMessage, 3);
-            if ($client === false) {
-                throw new Exception('Connect ' . $host . '::' . $port . ' fail');
-            }
-            return $client;
-        });
+        $pool->created($host . '::' . $port, 10, [$this, 'connect']);
         return $pool;
+    }
+
+
+    /**
+     * @param $host
+     * @param $port
+     * @return CoroutineClient|AsyncClient
+     * @throws Exception
+     */
+    public function connect($host, $port): CoroutineClient|AsyncClient
+    {
+        if (Kiri\Di\Context::inCoroutine()) {
+            $client = new CoroutineClient(SWOOLE_SOCK_TCP);
+        } else {
+            $client = new AsyncClient(SWOOLE_SOCK_TCP);
+        }
+        if (!$client->connect($host, $port, 3)) {
+            throw new Exception('Connect ' . $host . '::' . $port . ' fail');
+        }
+        return $client;
     }
 
 }

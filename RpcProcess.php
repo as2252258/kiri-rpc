@@ -26,12 +26,6 @@ class RpcProcess extends BaseProcess
      */
     public function process(?Process $process): void
     {
-        // TODO: Implement process() method.
-        while (true) {
-            $read = $process->read();
-
-
-        }
 
     }
 

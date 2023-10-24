@@ -28,13 +28,13 @@ trait TraitTransporter
 	 * @param $content
 	 * @return string|bool
 	 */
-	private function request(mixed $client, $content): string|bool
+    protected function request(mixed $client, $content): string|bool
 	{
-        socket_write($client, $content, mb_strlen($content));
+        socket_write($client, \msgpack_pack($content), mb_strlen($content));
 
         socket_read($client, 1024);
 
-		return $client->recv();
+		return \msgpack_unpack($client->recv());
 	}
 
 
@@ -43,7 +43,7 @@ trait TraitTransporter
 	 * @return $this
 	 * @throws RpcServiceException
 	 */
-	private function get_consul(string $service): static
+    protected function get_consul(string $service): static
 	{
 		if (empty($service)) {
 			throw new RpcServiceException('You need set rpc service name if used.');
@@ -62,7 +62,7 @@ trait TraitTransporter
 	 * @return array
 	 */
 	#[ArrayShape(['Address' => "mixed", 'Port' => "mixed"])]
-	private function _loadRand($services): array
+    protected function _loadRand($services): array
 	{
 		$array = [];
 		foreach ($services as $value) {
@@ -86,7 +86,7 @@ trait TraitTransporter
 	 * @return Client|Coroutine\Client
 	 * @throws Exception
 	 */
-	private function newClient(): Coroutine\Client|Client
+	protected function newClient(): Coroutine\Client|Client
 	{
 		if (Context::inCoroutine()) {
 			$client = new Coroutine\Client(SWOOLE_SOCK_TCP);
