@@ -192,6 +192,7 @@ class RpcJsonp extends Component implements OnConnectInterface, OnReceiveInterfa
 //            $code = $throwable->getCode() == 0 ? -32603 : $throwable->getCode();
 //            return $this->failure($code, jTraceEx($throwable), [], $data['id'] ?? null);
 //        }
+        return $this->failure(404, 'Not found.');
     }
 
 
